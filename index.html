@@ -6,42 +6,15 @@
     <title>Instinct App</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        @keyframes rainbowBorder {
-            0% {
-                border-color: #ff00ff;
-            }
-            25% {
-                border-color: #ff0000;
-            }
-            50% {
-                border-color: #ffff00;
-            }
-            75% {
-                border-color: #00ff00;
-            }
-            100% {
-                border-color: #00ffff;
-            }
+        @property --rotate {
+            syntax: "<angle>";
+            initial-value: 132deg;
+            inherits: false;
         }
 
-        @keyframes cometTrail {
-            0% {
-                opacity: 1;
-                transform: translateX(0) translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(100px) translateY(100px) scale(0);
-            }
-        }
-
-        @keyframes appleGradient {
-            0%, 100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
+        :root {
+            --card-height: 65vh;
+            --card-width: calc(var(--card-height) / 1.5);
         }
 
         body {
@@ -102,63 +75,75 @@
             position: relative;
             overflow: hidden;
             transition: background 0.3s, color 0.3s;
-            color: #3bff76;
+            width: 200px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            color: rgb(88 199 250 / 0%);
+            border-radius: 6px;
         }
 
-        .btn-place {
-            background: #3bff76;
-            color: white;
-            border: 2px solid black;
-            position: relative;
-            overflow: hidden;
+        button:hover {
+            color: rgb(88 199 250 / 100%);
+            transition: color 1s;
         }
 
-        .btn-place::before {
+        button:hover:before, button:hover:after {
+            animation: none;
+            opacity: 0;
+        }
+
+        button::before {
             content: "";
+            width: 104%;
+            height: 102%;
+            border-radius: 8px;
+            background-image: linear-gradient(
+                var(--rotate), #5ddcff, #3c67e3 43%, #4e00c2);
             position: absolute;
-            top: 0;
+            z-index: -1;
+            top: -1%;
+            left: -2%;
+            animation: spin 2.5s linear infinite;
+        }
+
+        button::after {
+            position: absolute;
+            content: "";
+            top: 10%;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, #ff00ff, #ff0000, #ffff00, #00ff00, #00ffff);
             z-index: -1;
-            filter: blur(5px);
-            opacity: 0.7;
-            animation: rainbowBorder 2s infinite;
-            transition: transform 0.3s;
-            transform: scale(0);
+            height: 100%;
+            width: 100%;
+            margin: 0 auto;
+            transform: scale(0.8);
+            filter: blur(20px);
+            background-image: linear-gradient(
+                var(--rotate), #5ddcff, #3c67e3 43%, #4e00c2);
+            opacity: 1;
+            transition: opacity .5s;
+            animation: spin 2.5s linear infinite;
         }
 
-        .btn-place:active::before {
-            transform: scale(1);
+        @keyframes spin {
+            0% {
+                --rotate: 0deg;
+            }
+            100% {
+                --rotate: 360deg;
+            }
         }
 
-        .btn-confirm {
-            background: #ff3e3e;
-            color: white;
-            border: 2px solid black;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-confirm::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, #ff00ff, #ff0000, #ffff00, #00ff00, #00ffff);
-            z-index: -1;
-            filter: blur(5px);
-            opacity: 0.7;
-            animation: rainbowBorder 2s infinite;
-            transition: transform 0.3s;
-            transform: scale(0);
-        }
-
-        .btn-confirm:active::before {
-            transform: scale(1);
+        @keyframes appleGradient {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         .avatars img {
@@ -190,6 +175,7 @@
         .live-chat {
             margin-top: 20px;
         }
+
     </style>
 </head>
 <body class="bg-slate-200 dark:bg-gray-800 flex items-center justify-center min-h-screen">
@@ -200,7 +186,7 @@
     <div id="page1" class="page active">
         <h1 class="text-2xl font-bold text-center text-white mb-4">Instinct</h1>
         <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
-        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page2')">Enter</button>
+        <button class="mt-4 px-4 py-2" onclick="navigateTo('page2')">Enter</button>
     </div>
     
     <!-- Page 2 -->
@@ -209,7 +195,7 @@
         <h2 class="text-xl text-center text-white mb-4">Setup your account</h2>
         <input type="text" id="name" placeholder="Name" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
         <input type="tel" id="phone" placeholder="Phone" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
-        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page3')">Next</button>
+        <button class="mt-4 px-4 py-2" onclick="navigateTo('page3')">Next</button>
     </div>
     
     <!-- Page 3 -->
@@ -221,7 +207,7 @@
             <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Bear-Avatar-icon.png" alt="Avatar 3" onclick="selectAvatar('avatar3')" class="cursor-pointer">
             <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Lama-Avatar-icon.png" alt="Avatar 4" onclick="selectAvatar('avatar4')" class="cursor-pointer">
         </div>
-        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page4')">Next</button>
+        <button class="mt-4 px-4 py-2" onclick="navigateTo('page4')">Next</button>
     </div>
     
     <!-- Page 4 -->
@@ -230,8 +216,8 @@
             <iframe src="https://www.youtube.com/embed/lnmYNMpbiK0?autoplay=1&controls=0&showinfo=0&rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
         </div>
         <div class="bet-buttons flex justify-around">
-            <button class="btn-place px-4 py-2 rounded-md" onclick="bet('Lion')">Bet Lion</button>
-            <button class="btn-confirm px-4 py-2 rounded-md" onclick="bet('Buffalo')">Bet Buffalo</button>
+            <button class="px-4 py-2" onclick="bet('Lion')">Bet Lion</button>
+            <button class="px-4 py-2" onclick="bet('Buffalo')">Bet Buffalo</button>
         </div>
         <div class="live-chat mt-4">
             <textarea id="chatBox" placeholder="Type your message..." class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all"></textarea>
