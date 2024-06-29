@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instinct App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes rainbowBorder {
+            0% {
+                border-color: #ff00ff;
+            }
+            25% {
+                border-color: #ff0000;
+            }
+            50% {
+                border-color: #ffff00;
+            }
+            75% {
+                border-color: #00ff00;
+            }
+            100% {
+                border-color: #00ffff;
+            }
+        }
+
+        @keyframes cometTrail {
+            0% {
+                opacity: 1;
+                transform: translateX(0) translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100px) translateY(100px) scale(0);
+            }
+        }
+
+        @keyframes appleGradient {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        body {
+            background-color: black;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .ball {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff3e3e, #ffb03b, #fffb3b, #3bff76, #3bfbff, #3b76ff, #ff3eeb);
+            background-size: 400% 400%;
+            animation: appleGradient 10s ease infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        .fragment {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: inherit;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .page {
+            display: none;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .option-box {
+            transition: box-shadow 0.3s, border-color 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .selected {
+            box-shadow: 0 0 15px 5px #ffc107;
+            border-color: black;
+            background-color: #ffff99;
+        }
+
+        button {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+            color: #3bff76;
+        }
+
+        .btn-place {
+            background: #3bff76;
+            color: white;
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-place::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff00ff, #ff0000, #ffff00, #00ff00, #00ffff);
+            z-index: -1;
+            filter: blur(5px);
+            opacity: 0.7;
+            animation: rainbowBorder 2s infinite;
+            transition: transform 0.3s;
+            transform: scale(0);
+        }
+
+        .btn-place:active::before {
+            transform: scale(1);
+        }
+
+        .btn-confirm {
+            background: #ff3e3e;
+            color: white;
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-confirm::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff00ff, #ff0000, #ffff00, #00ff00, #00ffff);
+            z-index: -1;
+            filter: blur(5px);
+            opacity: 0.7;
+            animation: rainbowBorder 2s infinite;
+            transition: transform 0.3s;
+            transform: scale(0);
+        }
+
+        .btn-confirm:active::before {
+            transform: scale(1);
+        }
+
+        .avatars img {
+            width: 60px;
+            height: 60px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .video-frame {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .video-frame iframe {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+        }
+
+        .bet-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .live-chat {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-gray-800 flex items-center justify-center min-h-screen">
+    <!-- Bouncing Ball -->
+    <div class="ball" id="ball"></div>
+
+    <!-- Page 1 -->
+    <div id="page1" class="page active">
+        <h1 class="text-2xl font-bold text-center text-white mb-4">Instinct</h1>
+        <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page2')">Enter</button>
+    </div>
+    
+    <!-- Page 2 -->
+    <div id="page2" class="page">
+        <h1 class="text-2xl font-bold text-center text-white mb-4">Welcome, <span id="userEmail"></span></h1>
+        <h2 class="text-xl text-center text-white mb-4">Setup your account</h2>
+        <input type="text" id="name" placeholder="Name" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+        <input type="tel" id="phone" placeholder="Phone" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page3')">Next</button>
+    </div>
+    
+    <!-- Page 3 -->
+    <div id="page3" class="page">
+        <h2 class="text-xl text-center text-white mb-4">Choose your avatar</h2>
+        <div class="avatars flex justify-center gap-4">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYGG5wQxwQh8ZwAf-6K84NnUZ_lngQxgMSiw&s" alt="Avatar 1" onclick="selectAvatar('avatar1')" class="cursor-pointer">
+            <img src="https://cdn.icon-icons.com/icons2/1368/PNG/512/-avatar_89781.png" alt="Avatar 2" onclick="selectAvatar('avatar2')" class="cursor-pointer">
+            <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Bear-Avatar-icon.png" alt="Avatar 3" onclick="selectAvatar('avatar3')" class="cursor-pointer">
+            <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Lama-Avatar-icon.png" alt="Avatar 4" onclick="selectAvatar('avatar4')" class="cursor-pointer">
+        </div>
+        <button class="mt-4 btn-place px-4 py-2 rounded-md" onclick="navigateTo('page4')">Next</button>
+    </div>
+    
+    <!-- Page 4 -->
+    <div id="page4" class="page">
+        <div class="video-frame mb-4">
+            <iframe src="https://www.youtube.com/embed/lnmYNMpbiK0?autoplay=1&controls=0&showinfo=0&rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
+        </div>
+        <div class="bet-buttons flex justify-around">
+            <button class="btn-place px-4 py-2 rounded-md" onclick="bet('Lion')">Bet Lion</button>
+            <button class="btn-confirm px-4 py-2 rounded-md" onclick="bet('Buffalo')">Bet Buffalo</button>
+        </div>
+        <div class="live-chat mt-4">
+            <textarea id="chatBox" placeholder="Type your message..." class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all"></textarea>
+        </div>
+    </div>
+    
+    <script>
+        function navigateTo(pageId) {
+            const emailInput = document.getElementById('email').value;
+            if (pageId === 'page2' && !validateEmail(emailInput)) {
+                alert("Please enter a valid email.");
+                return;
+            }
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Show the selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Set email in page 2
+            if (pageId === 'page2') {
+                document.getElementById('userEmail').innerText = emailInput;
+            }
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function selectAvatar(avatarId) {
+            // Store the selected avatar or perform any action
+            console.log('Selected avatar:', avatarId);
+        }
+
+        function bet(option) {
+            // Perform the betting action
+            console.log('Bet on:', option);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('page1').classList.add('active');
+            startBallAnimation();
+        });
+
+        function startBallAnimation() {
+            const ball = document.getElementById('ball');
+            let posX = Math.random() * (window.innerWidth - 100);
+            let posY = Math.random() * (window.innerHeight - 100);
+            let velX = (Math.random() * 20) - 10; // Increased speed
+            let velY = (Math.random() * 30) - 15; // Increased speed for higher bounce
+            const ballSize = 100;
+            const gravity = 0.5; // Increased gravity
+            const colors = Array.from({length: 40}, (_, i) => `hsl(${i * 9}, 100%, 50%)`);
+            let colorIndex = 0;
+
+            function createFragment(x, y) {
+                const fragment = document.createElement('div');
+                fragment.className = 'fragment';
+                fragment.style.left = `${x}px`;
+                fragment.style.top = `${y}px`;
+                fragment.style.background = ball.style.background;
+                document.body.appendChild(fragment);
+
+                const fragmentVelX = (Math.random() * 20) - 10;
+                const fragmentVelY = (Math.random() * 20) - 10;
+                const fragmentLife = Math.random() * 1000 + 500; // random lifespan between 500ms and 1500ms
+
+                function moveFragment() {
+                    x += fragmentVelX;
+                    y += fragmentVelY;
+                    fragment.style.transform = `translate(${x}px, ${y}px)`;
+                    if (fragmentLife > 0) {
+                        requestAnimationFrame(moveFragment);
+                    } else {
+                        fragment.remove();
+                    }
+                }
+                moveFragment();
+            }
+
+            function changeColor() {
+                colorIndex = (colorIndex + 1) % colors.length;
+                ball.style.background = colors[colorIndex];
+            }
+
+            function moveBall() {
+                posX += velX;
+                posY += velY;
+                velY += gravity;
+
+                if (posX + ballSize > window.innerWidth) {
+                    posX = window.innerWidth - ballSize;
+                    velX *= -1;
+                    changeColor();
+                    for (let i = 0; i < 5; i++) {
+                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                    }
+                } else if (posX < 0) {
+                    posX = 0;
+                    velX *= -1;
+                    changeColor();
+                    for (let i = 0; i < 5; i++) {
+                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                    }
+                }
+
+                if (posY + ballSize > window.innerHeight) {
+                    posY = window.innerHeight - ballSize;
+                    velY *= -1.1; // simulate bounce with increased height
+                    changeColor();
+                    for (let i = 0; i < 5; i++) {
+                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                    }
+                } else if (posY < 0) {
+                    posY = 0;
+                    velY *= -0.9;
+                    changeColor();
+                    for (let i = 0; i < 5; i++) {
+                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                    }
+                }
+
+                ball.style.transform = `translate(${posX}px, ${posY}px)`;
+                requestAnimationFrame(moveBall);
+            }
+
+            moveBall();
+        }
+    </script>
+</body>
+</html>
