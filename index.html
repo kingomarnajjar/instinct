@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instinct App</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
@@ -175,180 +174,586 @@
         .live-chat {
             margin-top: 20px;
         }
-
     </style>
 </head>
-<body class="bg-slate-200 dark:bg-gray-800 flex items-center justify-center min-h-screen">
-    <!-- Bouncing Ball -->
-    <div class="ball" id="ball"></div>
+<body>
+<script type="x-shader/x-vertex" id="vertexshader">
+  attribute float size;
+  attribute vec3 customColor;
+  varying vec3 vColor;
+  void main() {
+    vColor = customColor;
+    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+    gl_PointSize = size * ( 300.0 / -mvPosition.z );
+    gl_Position = projectionMatrix * mvPosition;
+  }
+</script>
+<script type="x-shader/x-fragment" id="fragmentshader">
+ uniform vec3 color;
+ uniform sampler2D pointTexture;
+ varying vec3 vColor;
+ void main() {
+   gl_FragColor = vec4( color * vColor, 1.0 );
+   gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+ }
+</script>
 
-    <!-- Page 1 -->
-    <div id="page1" class="page active">
-        <h1 class="text-2xl font-bold text-center text-white mb-4">Instinct</h1>
-        <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
-        <button class="mt-4 px-4 py-2" onclick="navigateTo('page2')">Enter</button>
+<div id="magic"></div>
+<div class="playground">
+  <div class="bottomPosition">
+     <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 278.8 278.8"><circle fill="#000205" cx="139.4" cy="139.4" r="139.4"/><g fill="none" stroke="#FFF" stroke-width="6.062" stroke-miterlimit="10"><path d="M214 183.4l-74.6 43.1-75.5-43.6V95.8l75.5-43.5 75.4 43.5v59.8l-11.3 6.5z"/><path d="M139.4 226.5l-18.8-38.2 18.8 10.8 75.4-43.5M63.9 95.8l75.3 43.6 75.6-43.6M139.2 139.4v59.7"/></g></svg>
+    <h1 class="special">RICARDO SANPRIETO <br><span class="minText">Creative Frontend developer</span></h1>
+    <button class="mt-4 px-4 py-2" onclick="navigateTo('page1')">Enter</button>
+  </div>
+</div>
+
+<!-- Pages -->
+<div id="page1" class="page">
+    <h1 class="text-2xl font-bold text-center text-white mb-4">Instinct</h1>
+    <input type="email" id="email" placeholder="Enter your email" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+    <button class="mt-4 px-4 py-2" onclick="navigateTo('page2')">Enter</button>
+</div>
+
+<div id="page2" class="page">
+    <h1 class="text-2xl font-bold text-center text-white mb-4">Welcome, <span id="userEmail"></span></h1>
+    <h2 class="text-xl text-center text-white mb-4">Setup your account</h2>
+    <input type="text" id="name" placeholder="Name" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+    <input type="tel" id="phone" placeholder="Phone" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
+    <button class="mt-4 px-4 py-2" onclick="navigateTo('page3')">Next</button>
+</div>
+
+<div id="page3" class="page">
+    <h2 class="text-xl text-center text-white mb-4">Choose your avatar</h2>
+    <div class="avatars flex justify-center gap-4">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYGG5wQxwQh8ZwAf-6K84NnUZ_lngQxgMSiw&s" alt="Avatar 1" onclick="selectAvatar('avatar1')" class="cursor-pointer">
+        <img src="https://cdn.icon-icons.com/icons2/1368/PNG/512/-avatar_89781.png" alt="Avatar 2" onclick="selectAvatar('avatar2')" class="cursor-pointer">
+        <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Bear-Avatar-icon.png" alt="Avatar 3" onclick="selectAvatar('avatar3')" class="cursor-pointer">
+        <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Lama-Avatar-icon.png" alt="Avatar 4" onclick="selectAvatar('avatar4')" class="cursor-pointer">
     </div>
-    
-    <!-- Page 2 -->
-    <div id="page2" class="page">
-        <h1 class="text-2xl font-bold text-center text-white mb-4">Welcome, <span id="userEmail"></span></h1>
-        <h2 class="text-xl text-center text-white mb-4">Setup your account</h2>
-        <input type="text" id="name" placeholder="Name" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
-        <input type="tel" id="phone" placeholder="Phone" class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all" required>
-        <button class="mt-4 px-4 py-2" onclick="navigateTo('page3')">Next</button>
+    <button class="mt-4 px-4 py-2" onclick="navigateTo('page4')">Next</button>
+</div>
+
+<div id="page4" class="page">
+    <div class="video-frame mb-4">
+        <iframe src="https://www.youtube.com/embed/lnmYNMpbiK0?autoplay=1&controls=0&showinfo=0&rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
     </div>
-    
-    <!-- Page 3 -->
-    <div id="page3" class="page">
-        <h2 class="text-xl text-center text-white mb-4">Choose your avatar</h2>
-        <div class="avatars flex justify-center gap-4">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYGG5wQxwQh8ZwAf-6K84NnUZ_lngQxgMSiw&s" alt="Avatar 1" onclick="selectAvatar('avatar1')" class="cursor-pointer">
-            <img src="https://cdn.icon-icons.com/icons2/1368/PNG/512/-avatar_89781.png" alt="Avatar 2" onclick="selectAvatar('avatar2')" class="cursor-pointer">
-            <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Bear-Avatar-icon.png" alt="Avatar 3" onclick="selectAvatar('avatar3')" class="cursor-pointer">
-            <img src="https://icons.iconarchive.com/icons/iconarchive/incognito-animals/512/Lama-Avatar-icon.png" alt="Avatar 4" onclick="selectAvatar('avatar4')" class="cursor-pointer">
-        </div>
-        <button class="mt-4 px-4 py-2" onclick="navigateTo('page4')">Next</button>
+    <div class="bet-buttons flex justify-around">
+        <button class="px-4 py-2" onclick="bet('Lion')">Bet Lion</button>
+        <button class="px-4 py-2" onclick="bet('Buffalo')">Bet Buffalo</button>
     </div>
-    
-    <!-- Page 4 -->
-    <div id="page4" class="page">
-        <div class="video-frame mb-4">
-            <iframe src="https://www.youtube.com/embed/lnmYNMpbiK0?autoplay=1&controls=0&showinfo=0&rel=0&modestbranding=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
-        </div>
-        <div class="bet-buttons flex justify-around">
-            <button class="px-4 py-2" onclick="bet('Lion')">Bet Lion</button>
-            <button class="px-4 py-2" onclick="bet('Buffalo')">Bet Buffalo</button>
-        </div>
-        <div class="live-chat mt-4">
-            <textarea id="chatBox" placeholder="Type your message..." class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all"></textarea>
-        </div>
+    <div class="live-chat mt-4">
+        <textarea id="chatBox" placeholder="Type your message..." class="w-full p-3 rounded-md text-gray-800 dark:text-gray-300 bg-white dark:bg-gray-900 border-2 border-gray-500 focus:border-blue-400 focus:outline-none transition-all"></textarea>
     </div>
-    
-    <script>
-        function navigateTo(pageId) {
-            const emailInput = document.getElementById('email').value;
-            if (pageId === 'page2' && !validateEmail(emailInput)) {
-                alert("Please enter a valid email.");
-                return;
-            }
-            
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            // Show the selected page
-            document.getElementById(pageId).classList.add('active');
-            
-            // Set email in page 2
-            if (pageId === 'page2') {
-                document.getElementById('userEmail').innerText = emailInput;
-            }
-        }
+</div>
 
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(String(email).toLowerCase());
+<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js'></script>
+<script>
+    function navigateTo(pageId) {
+        const emailInput = document.getElementById('email').value;
+        if (pageId === 'page2' && !validateEmail(emailInput)) {
+            alert("Please enter a valid email.");
+            return;
         }
-
-        function selectAvatar(avatarId) {
-            // Store the selected avatar or perform any action
-            console.log('Selected avatar:', avatarId);
-        }
-
-        function bet(option) {
-            // Perform the betting action
-            console.log('Bet on:', option);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('page1').classList.add('active');
-            startBallAnimation();
+        
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
         });
-
-        function startBallAnimation() {
-            const ball = document.getElementById('ball');
-            let posX = Math.random() * (window.innerWidth - 100);
-            let posY = Math.random() * (window.innerHeight - 100);
-            let velX = (Math.random() * 20) - 10; // Increased speed
-            let velY = (Math.random() * 30) - 15; // Increased speed for higher bounce
-            const ballSize = 100;
-            const gravity = 0.5; // Increased gravity
-            const colors = Array.from({length: 40}, (_, i) => `hsl(${i * 9}, 100%, 50%)`);
-            let colorIndex = 0;
-
-            function createFragment(x, y) {
-                const fragment = document.createElement('div');
-                fragment.className = 'fragment';
-                fragment.style.left = `${x}px`;
-                fragment.style.top = `${y}px`;
-                fragment.style.background = ball.style.background;
-                document.body.appendChild(fragment);
-
-                const fragmentVelX = (Math.random() * 20) - 10;
-                const fragmentVelY = (Math.random() * 20) - 10;
-                const fragmentLife = Math.random() * 1000 + 500; // random lifespan between 500ms and 1500ms
-
-                function moveFragment() {
-                    x += fragmentVelX;
-                    y += fragmentVelY;
-                    fragment.style.transform = `translate(${x}px, ${y}px)`;
-                    if (fragmentLife > 0) {
-                        requestAnimationFrame(moveFragment);
-                    } else {
-                        fragment.remove();
-                    }
-                }
-                moveFragment();
-            }
-
-            function changeColor() {
-                colorIndex = (colorIndex + 1) % colors.length;
-                ball.style.background = colors[colorIndex];
-            }
-
-            function moveBall() {
-                posX += velX;
-                posY += velY;
-                velY += gravity;
-
-                if (posX + ballSize > window.innerWidth) {
-                    posX = window.innerWidth - ballSize;
-                    velX *= -1;
-                    changeColor();
-                    for (let i = 0; i < 5; i++) {
-                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
-                    }
-                } else if (posX < 0) {
-                    posX = 0;
-                    velX *= -1;
-                    changeColor();
-                    for (let i = 0; i < 5; i++) {
-                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
-                    }
-                }
-
-                if (posY + ballSize > window.innerHeight) {
-                    posY = window.innerHeight - ballSize;
-                    velY *= -1.1; // simulate bounce with increased height
-                    changeColor();
-                    for (let i = 0; i < 5; i++) {
-                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
-                    }
-                } else if (posY < 0) {
-                    posY = 0;
-                    velY *= -0.9;
-                    changeColor();
-                    for (let i = 0; i < 5; i++) {
-                        createFragment(posX + ballSize / 2, posY + ballSize / 2);
-                    }
-                }
-
-                ball.style.transform = `translate(${posX}px, ${posY}px)`;
-                requestAnimationFrame(moveBall);
-            }
-
-            moveBall();
+        // Show the selected page
+        document.getElementById(pageId).classList.add('active');
+        
+        // Set email in page 2
+        if (pageId === 'page2') {
+            document.getElementById('userEmail').innerText = emailInput;
         }
-    </script>
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    function selectAvatar(avatarId) {
+        // Store the selected avatar or perform any action
+        console.log('Selected avatar:', avatarId);
+    }
+
+    function bet(option) {
+        // Perform the betting action
+        console.log('Bet on:', option);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        startBallAnimation();
+        preload();
+    });
+
+    function startBallAnimation() {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        document.body.appendChild(ball);
+
+        let posX = Math.random() * (window.innerWidth - 100);
+        let posY = Math.random() * (window.innerHeight - 100);
+        let velX = (Math.random() * 20) - 10; // Increased speed
+        let velY = (Math.random() * 30) - 15; // Increased speed for higher bounce
+        const ballSize = 100;
+        const gravity = 0.5; // Increased gravity
+        const colors = Array.from({length: 40}, (_, i) => `hsl(${i * 9}, 100%, 50%)`);
+        let colorIndex = 0;
+
+        function createFragment(x, y) {
+            const fragment = document.createElement('div');
+            fragment.className = 'fragment';
+            fragment.style.left = `${x}px`;
+            fragment.style.top = `${y}px`;
+            fragment.style.background = ball.style.background;
+            document.body.appendChild(fragment);
+
+            const fragmentVelX = (Math.random() * 20) - 10;
+            const fragmentVelY = (Math.random() * 20) - 10;
+            const fragmentLife = Math.random() * 1000 + 500; // random lifespan between 500ms and 1500ms
+
+            function moveFragment() {
+                x += fragmentVelX;
+                y += fragmentVelY;
+                fragment.style.transform = `translate(${x}px, ${y}px)`;
+                if (fragmentLife > 0) {
+                    requestAnimationFrame(moveFragment);
+                } else {
+                    fragment.remove();
+                }
+            }
+            moveFragment();
+        }
+
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            ball.style.background = colors[colorIndex];
+        }
+
+        function moveBall() {
+            posX += velX;
+            posY += velY;
+            velY += gravity;
+
+            if (posX + ballSize > window.innerWidth) {
+                posX = window.innerWidth - ballSize;
+                velX *= -1;
+                changeColor();
+                for (let i = 0; i < 5; i++) {
+                    createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                }
+            } else if (posX < 0) {
+                posX = 0;
+                velX *= -1;
+                changeColor();
+                for (let i = 0; i < 5; i++) {
+                    createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                }
+            }
+
+            if (posY + ballSize > window.innerHeight) {
+                posY = window.innerHeight - ballSize;
+                velY *= -1.1; // simulate bounce with increased height
+                changeColor();
+                for (let i = 0; i < 5; i++) {
+                    createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                }
+            } else if (posY < 0) {
+                posY = 0;
+                velY *= -0.9;
+                changeColor();
+                for (let i = 0; i < 5; i++) {
+                    createFragment(posX + ballSize / 2, posY + ballSize / 2);
+                }
+            }
+
+            ball.style.transform = `translate(${posX}px, ${posY}px)`;
+            requestAnimationFrame(moveBall);
+        }
+
+        moveBall();
+    }
+
+    const preload = () => {
+
+        let manager = new THREE.LoadingManager();
+        manager.onLoad = function() { 
+          const environment = new Environment( typo, particle );
+        }
+      
+        var typo = null;
+        const loader = new THREE.FontLoader( manager );
+        const font = loader.load('https://res.cloudinary.com/dydre7amr/raw/upload/v1612950355/font_zsd4dr.json', function ( font ) { typo = font; });
+        const particle = new THREE.TextureLoader( manager ).load( 'https://res.cloudinary.com/dfvtkoboz/image/upload/v1605013866/particle_a64uzf.png');
+      
+    }
+    
+    class Environment {
+    
+        constructor( font, particle ){ 
+    
+          this.font = font;
+          this.particle = particle;
+          this.container = document.querySelector( '#magic' );
+          this.scene = new THREE.Scene();
+          this.createCamera();
+          this.createRenderer();
+          this.setup()
+          this.bindEvents();
+        }
+    
+        bindEvents(){
+    
+          window.addEventListener( 'resize', this.onWindowResize.bind( this ));
+          
+        }
+    
+        setup(){ 
+    
+          this.createParticles = new CreateParticles( this.scene, this.font, this.particle, this.camera, this.renderer );
+        }
+    
+        render() {
+          
+           this.createParticles.render()
+           this.renderer.render( this.scene, this.camera )
+        }
+    
+        createCamera() {
+    
+          this.camera = new THREE.PerspectiveCamera( 65, this.container.clientWidth /  this.container.clientHeight, 1, 10000 );
+          this.camera.position.set( 0,0, 100 );
+    
+        }
+    
+        createRenderer() {
+    
+          this.renderer = new THREE.WebGLRenderer();
+          this.renderer.setSize( this.container.clientWidth, this.container.clientHeight );
+    
+          this.renderer.setPixelRatio( Math.min( window.devicePixelRatio, 2));
+    
+          this.renderer.outputEncoding = THREE.sRGBEncoding;
+          this.container.appendChild( this.renderer.domElement );
+    
+          this.renderer.setAnimationLoop(() => { this.render() })
+    
+        }
+    
+        onWindowResize(){
+    
+          this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize( this.container.clientWidth, this.container.clientHeight );
+    
+        }
+    }
+    
+    class CreateParticles {
+        
+        constructor( scene, font, particleImg, camera, renderer ) {
+        
+            this.scene = scene;
+            this.font = font;
+            this.particleImg = particleImg;
+            this.camera = camera;
+            this.renderer = renderer;
+            
+            this.raycaster = new THREE.Raycaster();
+            this.mouse = new THREE.Vector2(-200, 200);
+            
+            this.colorChange = new THREE.Color();
+    
+            this.buttom = false;
+    
+            this.data = {
+    
+                text: 'FUTURE\nIS NOW',
+                amount: 1500,
+                particleSize: 1,
+                particleColor: 0xffffff,
+                textSize: 16,
+                area: 250,
+                ease: .05,
+            }
+    
+            this.setup();
+            this.bindEvents();
+    
+        }
+    
+    
+        setup(){
+    
+            const geometry = new THREE.PlaneGeometry( this.visibleWidthAtZDepth( 100, this.camera ), this.visibleHeightAtZDepth( 100, this.camera ));
+            const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true } );
+            this.planeArea = new THREE.Mesh( geometry, material );
+            this.planeArea.visible = false;
+            this.createText();
+    
+        }
+    
+        bindEvents() {
+    
+            document.addEventListener( 'mousedown', this.onMouseDown.bind( this ));
+            document.addEventListener( 'mousemove', this.onMouseMove.bind( this ));
+            document.addEventListener( 'mouseup', this.onMouseUp.bind( this ));
+            
+        }
+    
+        onMouseDown(){
+            
+            this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    
+            const vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 0.5);
+            vector.unproject( this.camera );
+            const dir = vector.sub( this.camera.position ).normalize();
+            const distance = - this.camera.position.z / dir.z;
+            this.currenPosition = this.camera.position.clone().add( dir.multiplyScalar( distance ) );
+            
+            const pos = this.particles.geometry.attributes.position;
+            this.buttom = true;
+            this.data.ease = .01;
+            
+        }
+    
+        onMouseUp(){
+    
+            this.buttom = false;
+            this.data.ease = .05;
+        }
+    
+        onMouseMove( ) { 
+    
+            this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    
+        }
+    
+        render( level ){ 
+    
+            const time = ((.001 * performance.now())%12)/12;
+            const zigzagTime = (1 + (Math.sin( time * 2 * Math.PI )))/6;
+    
+            this.raycaster.setFromCamera( this.mouse, this.camera );
+    
+            const intersects = this.raycaster.intersectObject( this.planeArea );
+    
+            if ( intersects.length > 0 ) {
+    
+                const pos = this.particles.geometry.attributes.position;
+                const copy = this.geometryCopy.attributes.position;
+                const coulors = this.particles.geometry.attributes.customColor;
+                const size = this.particles.geometry.attributes.size;
+    
+                const mx = intersects[ 0 ].point.x;
+                const my = intersects[ 0 ].point.y;
+                const mz = intersects[ 0 ].point.z;
+    
+                for ( var i = 0, l = pos.count; i < l; i++) {
+    
+                    const initX = copy.getX(i);
+                    const initY = copy.getY(i);
+                    const initZ = copy.getZ(i);
+    
+                    let px = pos.getX(i);
+                    let py = pos.getY(i);
+                    let pz = pos.getZ(i);
+    
+                    this.colorChange.setHSL( .5, 1 , 1 )
+                    coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
+                    coulors.needsUpdate = true;
+    
+                    size.array[ i ]  = this.data.particleSize;
+                    size.needsUpdate = true;
+    
+                    let dx = mx - px;
+                    let dy = my - py;
+                    const dz = mz - pz;
+    
+                    const mouseDistance = this.distance( mx, my, px, py )
+                    let d = ( dx = mx - px ) * dx + ( dy = my - py ) * dy;
+                    const f = - this.data.area/d;
+    
+                    if( this.buttom ){ 
+    
+                        const t = Math.atan2( dy, dx );
+                        px -= f * Math.cos( t );
+                        py -= f * Math.sin( t );
+    
+                        this.colorChange.setHSL( .5 + zigzagTime, 1.0 , .5 )
+                        coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
+                        coulors.needsUpdate = true;
+    
+                        if ((px > (initX + 70)) || ( px < (initX - 70)) || (py > (initY + 70) || ( py < (initY - 70)))){
+    
+                            this.colorChange.setHSL( .15, 1.0 , .5 )
+                            coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
+                            coulors.needsUpdate = true;
+    
+                        }
+    
+                    }else{
+                    
+                        if( mouseDistance < this.data.area ){
+    
+                            if(i%5==0){
+    
+                                const t = Math.atan2( dy, dx );
+                                px -= .03 * Math.cos( t );
+                                py -= .03 * Math.sin( t );
+    
+                                this.colorChange.setHSL( .15 , 1.0 , .5 )
+                                coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
+                                coulors.needsUpdate = true;
+    
+                                size.array[ i ]  =  this.data.particleSize /1.2;
+                                size.needsUpdate = true;
+    
+                            }else{
+    
+                                const t = Math.atan2( dy, dx );
+                                px += f * Math.cos( t );
+                                py += f * Math.sin( t );
+    
+                                pos.setXYZ( i, px, py, pz );
+                                pos.needsUpdate = true;
+    
+                                size.array[ i ]  = this.data.particleSize * 1.3 ;
+                                size.needsUpdate = true;
+                            }
+    
+                            if ((px > (initX + 10)) || ( px < (initX - 10)) || (py > (initY + 10) || ( py < (initY - 10)))){
+    
+                                this.colorChange.setHSL( .15, 1.0 , .5 )
+                                coulors.setXYZ( i, this.colorChange.r, this.colorChange.g, this.colorChange.b )
+                                coulors.needsUpdate = true;
+    
+                                size.array[ i ]  = this.data.particleSize /1.8;
+                                size.needsUpdate = true;
+    
+                            }
+                        }
+    
+                    }
+    
+                    px += ( initX  - px ) * this.data.ease;
+                    py += ( initY  - py ) * this.data.ease;
+                    pz += ( initZ  - pz ) * this.data.ease;
+    
+                    pos.setXYZ( i, px, py, pz );
+                    pos.needsUpdate = true;
+    
+                }
+            }
+        }
+    
+        createText(){ 
+    
+            let thePoints = [];
+    
+            let shapes = this.font.generateShapes( this.data.text , this.data.textSize  );
+            let geometry = new THREE.ShapeGeometry( shapes );
+            geometry.computeBoundingBox();
+        
+            const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+            const yMid =  (geometry.boundingBox.max.y - geometry.boundingBox.min.y)/2.85;
+    
+            geometry.center();
+    
+            let holeShapes = [];
+    
+            for ( let q = 0; q < shapes.length; q ++ ) {
+    
+                let shape = shapes[ q ];
+    
+                if ( shape.holes && shape.holes.length > 0 ) {
+    
+                    for ( let  j = 0; j < shape.holes.length; j ++ ) {
+    
+                        let  hole = shape.holes[ j ];
+                        holeShapes.push( hole );
+                    }
+                }
+    
+            }
+            shapes.push.apply( shapes, holeShapes );
+    
+            let colors = [];
+            let sizes = [];
+                        
+            for ( let  x = 0; x < shapes.length; x ++ ) {
+    
+                let shape = shapes[ x ];
+    
+                const amountPoints = ( shape.type == 'Path') ? this.data.amount/2 : this.data.amount;
+    
+                let points = shape.getSpacedPoints( amountPoints ) ;
+    
+                points.forEach( ( element, z ) => {
+                            
+                    const a = new THREE.Vector3( element.x, element.y, 0 );
+                    thePoints.push( a );
+                    colors.push( this.colorChange.r, this.colorChange.g, this.colorChange.b);
+                    sizes.push( 1 )
+    
+                    });
+            }
+    
+            let geoParticles = new THREE.BufferGeometry().setFromPoints( thePoints );
+            geoParticles.translate( xMid, yMid, 0 );
+                    
+            geoParticles.setAttribute( 'customColor', new THREE.Float32BufferAttribute( colors, 3 ) );
+            geoParticles.setAttribute( 'size', new THREE.Float32BufferAttribute( sizes, 1) );
+    
+            const material = new THREE.ShaderMaterial( {
+    
+                uniforms: {
+                    color: { value: new THREE.Color( 0xffffff ) },
+                    pointTexture: { value: this.particleImg }
+                },
+                vertexShader: document.getElementById( 'vertexshader' ).textContent,
+                fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+    
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true,
+            } );
+    
+            this.particles = new THREE.Points( geoParticles, material );
+            this.scene.add( this.particles );
+    
+            this.geometryCopy = new THREE.BufferGeometry();
+            this.geometryCopy.copy( this.particles.geometry );
+            
+        }
+    
+        visibleHeightAtZDepth ( depth, camera ) {
+    
+          const cameraOffset = camera.position.z;
+          if ( depth < cameraOffset ) depth -= cameraOffset;
+          else depth += cameraOffset;
+    
+          const vFOV = camera.fov * Math.PI / 180; 
+    
+          return 2 * Math.tan( vFOV / 2 ) * Math.abs( depth );
+        }
+    
+        visibleWidthAtZDepth( depth, camera ) {
+    
+          const height = this.visibleHeightAtZDepth( depth, camera );
+          return height * camera.aspect;
+    
+        }
+    
+        distance (x1, y1, x2, y2){
+           
+            return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+        }
+    }
+</script>
 </body>
 </html>
