@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "commonjs",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": true, // This enables all strict type-checking options
+		"noImplicitAny": true, // Raise error on expressions and declarations with an implied `any` type.
+		"strictNullChecks": true, // Ensure `null` and `undefined` are only assignable to themselves and `any` (use `--strict` to enable this flag).
+		"strictFunctionTypes": true, // Ensure function type compatibility is strict.
+		"strictBindCallApply": true, // Ensure `bind`, `call`, and `apply` methods on functions strictly enforce their declared `this` parameter and argument types.
+		"strictPropertyInitialization": true, // Ensure class properties are correctly initialized in the constructor.
+		"noImplicitThis": true, // Raise error on `this` expressions with an implied `any` type.
+		"alwaysStrict": true, // Ensure `use strict` is always emitted.
+		"noUnusedLocals": true, // Report errors on unused locals.
+		"noUnusedParameters": true, // Report errors on unused parameters.
+		"noImplicitReturns": true, // Ensure all code paths in a function return a value.
+		"noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statements.
+		"esModuleInterop": true, // Enable compatibility with ECMAScript modules.
+		"skipLibCheck": true, // Skip type checking of declaration files.
+		"forceConsistentCasingInFileNames": true // Ensure file names are in consistent casing.
+	}
+}
