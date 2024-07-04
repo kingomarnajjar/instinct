@@ -7,8 +7,8 @@ const port = 3000
 const fee = 0.05 // 0.01 = 1%
 const initialLiquidity = 1000 // Initial liquidity for the market
 
-interface UserBalances { [key: number]: number }
-interface TeamFunds { [team: number]: number }
+interface Balances { [key: number]: number }
+
 interface Bet {
   userId: number
   team: number
@@ -16,21 +16,21 @@ interface Bet {
   odds: number[]
 }
 
-const userBalances: UserBalances = { 1: 1000, 2: 1000, 3: 1000, 4: 1000 }
-let teamFunds: TeamFunds = { 0: initialLiquidity, 1: initialLiquidity } // Initial funds for each team
+const userBalances: Balances = { 1: 1000, 2: 1000, 3: 1000, 4: 1000 }
+let teamFunds: Balances = { 0: initialLiquidity, 1: initialLiquidity } // Initial funds for each team
 const bets: Bet[] = []
 
-function calculateTotalFunds (funds: TeamFunds): number {
+function calculateTotalFunds (funds: Balances): number {
   return Object.values(funds).reduce((acc: number, val: number) => acc + val, 0)
 }
 
-function calculateOdds (funds: TeamFunds): number[] {
+function calculateOdds (funds: Balances): number[] {
   const totalFunds = calculateTotalFunds(funds)
   const exps = Object.values(funds).map(fund => Math.exp(fund / totalFunds))
   return exps
 }
 
-function calculateCost (funds: TeamFunds): number {
+function calculateCost (funds: Balances): number {
   const totalFunds = calculateTotalFunds(funds)
   const exps = Object.values(funds).map(fund => Math.exp(fund / totalFunds))
   const sumExp = exps.reduce((acc: number, val: number) => acc + val, 0)
@@ -40,7 +40,7 @@ function calculateCost (funds: TeamFunds): number {
   return result
 }
 
-function placeBet (userBalances: UserBalances, funds: TeamFunds, userId: number, team: number, cashAmount: number): TeamFunds {
+function placeBet (userBalances: Balances, funds: Balances, userId: number, team: number, cashAmount: number): Balances {
   const initialCost = calculateCost(funds)
 
   if (cashAmount === undefined || cashAmount === null || cashAmount <= 0) {
