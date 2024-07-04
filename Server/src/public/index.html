@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bets and Odds</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Betting System</h1>
+  <form id="betForm">
+    <label for="userId">User ID:</label>
+    <input type="number" id="userId" name="userId" required>
+    <label for="team">Team:</label>
+    <input type="number" id="team" name="team" required>
+    <label for="cashAmount">Cash Amount:</label>
+    <input type="number" id="cashAmount" name="cashAmount" required>
+    <button type="submit">Place Bet</button>
+  </form>
+
+  <h2>Current Odds</h2>
+  <div id="oddsContainer"></div>
+
+  <h2>Betting Graph</h2>
+  <canvas id="bettingChart" width="400" height="200"></canvas>
+
+  <h2>Odds on Offer</h2>
+  <form id="oddsForm">
+    <label for="offerCashAmount">Cash Amount:</label>
+    <input type="number" id="offerCashAmount" name="offerCashAmount" required>
+    <button type="submit">Get Odds on Offer</button>
+  </form>
+  <div id="oddsOnOfferContainer"></div>
+
+  <h2>All Bets</h2>
+  <div id="allBetsContainer"></div>
+
+  <script>
+    const betForm = document.getElementById('betForm');
+    const oddsContainer = document.getElementById('oddsContainer');
+    const oddsOnOfferContainer = document.getElementById('oddsOnOfferContainer');
+    const allBetsContainer = document.getElementById('allBetsContainer');
+    const oddsForm = document.getElementById('oddsForm');
+    const ctx = document.getElementById('bettingChart').getContext('2d');
+    let chart;
+
+    betForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('userId').value;
+      const team = document.getElementById('team').value;
+      const cashAmount = document.getElementById('cashAmount').value;
+
+      const response = await fetch(`/bets?userId=${userId}&team=${team}&cashAmount=${cashAmount}`);
+      const data = await response.json();
+
+      updateOdds(data.odds);
+      updateChart(data.odds);
+      updateAllBets(data.allBets);
+    });
+
+    oddsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cashAmount = document.getElementById('offerCashAmount').value;
+
+      const response = await fetch(`/odds-on-offer?cashAmount=${cashAmount}`);
+      const data = await response.json();
+
+      updateOddsOnOffer(data.oddsOnOffer);
+    });
+
+    function updateOdds(odds) {
+      oddsContainer.innerHTML = '';
+      odds.forEach((odd, index) => {
+        const p = document.createElement('p');
+        p.textContent = `Team ${index}: ${odd}`;
+        oddsContainer.appendChild(p);
+      });
+    }
+
+    function updateOddsOnOffer(odds) {
+      oddsOnOfferContainer.innerHTML = '';
+      odds.forEach((odd, index) => {
+        const p = document.createElement('p');
+        p.textContent = `Team ${index}: ${odd}`;
+        oddsOnOfferContainer.appendChild(p);
+      });
+    }
+
+    function updateChart(odds) {
+      if (chart) {
+        chart.destroy();
+      }
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: odds.map((_, index) => `Team ${index}`),
+          datasets: [{
+            label: 'Odds',
+            data: odds,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function updateAllBets(bets) {
+      allBetsContainer.innerHTML = '';
+      bets.forEach(bet => {
+        const p = document.createElement('p');
+        p.textContent = `User ${bet.userId} bet ${bet.amount} on Team ${bet.team} at odds ${bet.odds}`;
+        allBetsContainer.appendChild(p);
+      });
+    }
+  </script>
+</body>
+</html>
