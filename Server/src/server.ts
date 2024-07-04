@@ -9,12 +9,20 @@ function countLiquidity (sharesHeld: number[]): number {
   return sharesHeld.reduce((acc, val) => acc + val, 0)
 }
 
-function calculateMarginalPrice (team: number, sharesHeld: number[]): number {
+function calculateOdds (sharesHeld: number[]): number[] {
   const liquidity = countLiquidity(sharesHeld)
   const exps = sharesHeld.map(shares => Math.exp(shares / liquidity))
-  const sumExp = exps.reduce((acc, val) => acc + val, 0)
-  return exps[team] / sumExp
+  return exps
 }
+
+// function calculateMarginalPrice (team: number, sharesHeld: number[]): number {
+//   const liquidity = countLiquidity(sharesHeld)
+//   console.log('Liquidity:', sharesHeld)
+//   const exps = sharesHeld.map(shares => Math.exp(shares / liquidity))
+//   console.log('Exps:', exps)
+//   const sumExp = exps.reduce((acc, val) => acc + val, 0)
+//   return exps[team] / sumExp
+// }
 
 function countBets (userShares: UserShare[]): number[] {
   return Object.values(userShares.reduce((acc, curr) => {
@@ -56,7 +64,7 @@ function placeBet (userShares: UserShare[], userId: number, team: number, shares
 
   const transactionCost = calculateCost(countBets(userShares)) - initialCost
 
-  if (transactionCost > userBalances[userId]) {
+  if (transactionCost > userBalances[userId] && userBalances[userId] !== undefined && userBalances[userId] !== null) {
     console.log('Not enough balance')
     return userShares
   }
@@ -100,9 +108,7 @@ app.get('/bets', (req, res) => {
   userShares = placeBet(userShares, userId, team, sharesBought)
 
   const bets = countBets(userShares)
-  const odds: number[] = bets.map((_, i) => {
-    return calculateMarginalPrice(i, bets).toFixed(4) as unknown as number
-  })
+  const odds: number[] = calculateOdds(bets)
 
   const liquidity = countLiquidity(bets)
 
