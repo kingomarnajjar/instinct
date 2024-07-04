@@ -70,6 +70,10 @@ function placeBet (userShares: UserShare[], userId: number, team: number, shares
   }
 
   userBalances[userId] -= transactionCost
+  if (dollarsBet[userId] === undefined) dollarsBet[userId] = 0
+  dollarsBet[userId] += transactionCost
+
+  console.log('Paid $' + (transactionCost as unknown as string) + ' for ' + (sharesBought as unknown as string) + ' shares on team ' + (team as unknown as string) + ' by user ' + (userId as unknown as string))
 
   return newUserShares
 }
@@ -77,6 +81,7 @@ function placeBet (userShares: UserShare[], userId: number, team: number, shares
 interface UserShare { [key: number]: number }
 
 const userBalances: UserShare = { 1: 1000, 2: 1000, 3: 1000, 4: 1000 }
+const dollarsBet: UserShare = { 0: 2 }
 let userShares: UserShare[] = [{ 0: 1 }, { 0: 1 }]
 
 // app.get('/bets', (_, res) => {
@@ -92,6 +97,7 @@ let userShares: UserShare[] = [{ 0: 1 }, { 0: 1 }]
 // })
 
 app.get('/bets', (req, res) => {
+  res.header('Content-Type', 'application/json')
   const userId: number = parseInt(req.query.userId as unknown as string)
   const team: number = parseInt(req.query.team as unknown as string)
   const sharesBought: number = parseInt(req.query.sharesBought as unknown as string)
@@ -119,7 +125,8 @@ app.get('/bets', (req, res) => {
       const userBets = shares[userId] ?? 0
       return {
         shares: userBets,
-        winPayout: liquidity * Math.floor(100 * (userBets / bets[team])) / 100
+        winPayout: liquidity * Math.floor(100 * (userBets / bets[team])) / 100,
+        dollarsBet: dollarsBet[userId] ?? 0
       }
     })
   }))
