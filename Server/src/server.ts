@@ -104,6 +104,8 @@ app.get('/bets', (req, res) => {
     return calculateMarginalPrice(i, bets).toFixed(4) as unknown as number
   })
 
+  const liquidity = countLiquidity(bets)
+
   res.send(JSON.stringify({
     bets,
     odds,
@@ -111,7 +113,7 @@ app.get('/bets', (req, res) => {
       const userBets = shares[userId] ?? 0
       return {
         shares: userBets,
-        winPayout: userBets * 1 / odds[team]
+        winPayout: liquidity * Math.floor(100 * (userBets / bets[team])) / 100
       }
     })
   }))
