@@ -5,7 +5,7 @@ const app = express()
 const port = 3000
 
 const fee = 0.05 // 0.01 = 1%
-const initialLiquidity = 1000 // Initial liquidity for the market
+const initialLiquidity = 0 // Initial liquidity for the market
 
 interface Balances { [key: number]: number }
 
@@ -13,12 +13,15 @@ interface Bet {
   userId: number
   team: number
   amount: number
+  remainingAmount: number
   odds: number[]
+  status: 'unmatched' | 'partially matched' | 'matched'
 }
 
 const userBalances: Balances = { 1: 1000, 2: 1000, 3: 1000, 4: 1000 }
 let teamFunds: Balances = { 0: initialLiquidity, 1: initialLiquidity } // Initial funds for each team
 const bets: Bet[] = []
+const unmatchedBets: Bet[] = []
 
 function calculateTotalFunds (funds: Balances): number {
   return Object.values(funds).reduce((acc: number, val: number) => acc + val, 0)
@@ -38,6 +41,32 @@ function calculateCost (funds: Balances): number {
   const result = totalFunds * lnSumExp
   if (Number.isNaN(result)) return 0
   return result
+}
+
+function matchBet (bet: Bet): Bet | null {
+  for (let i = 0; i < unmatchedBets.length; i++) {
+    const unmatchedBet = unmatchedBets[i]
+    if (unmatchedBet.team !== bet.team && unmatchedBet.remainingAmount > 0) {
+      const matchedAmount = Math.min(bet.remainingAmount, unmatchedBet.remainingAmount)
+      unmatchedBet.remainingAmount -= matchedAmount
+      bet.remainingAmount -= matchedAmount
+
+      if (unmatchedBet.remainingAmount === 0) {
+        unmatchedBet.status = 'matched'
+        unmatchedBets.splice(i, 1)
+      } else {
+        unmatchedBet.status = 'partially matched'
+      }
+
+      if (bet.remainingAmount === 0) {
+        bet.status = 'matched'
+        return unmatchedBet
+      } else {
+        bet.status = 'partially matched'
+      }
+    }
+  }
+  return null
 }
 
 function placeBet (userBalances: Balances, funds: Balances, userId: number, team: number, cashAmount: number): Balances {
@@ -72,10 +101,15 @@ function placeBet (userBalances: Balances, funds: Balances, userId: number, team
 
   userBalances[userId] -= transactionCost
 
-  // Record the bet with the current odds
   const odds = calculateOdds(newFunds)
-  bets.push({ userId, team, amount: cashAmount, odds })
+  const newBet: Bet = { userId, team, amount: cashAmount, remainingAmount: cashAmount, odds, status: 'unmatched' }
 
+  const matchedBet = matchBet(newBet)
+  if (matchedBet == null) {
+    unmatchedBets.push(newBet)
+  }
+
+  bets.push(newBet)
   return newFunds
 }
 
@@ -113,7 +147,8 @@ app.get('/bets', (req, res) => {
     odds,
     yourBets: bets.filter(bet => bet.userId === userId),
     allBets: bets,
-    totalFunds
+    totalFunds,
+    unmatchedBets
   }))
 })
 

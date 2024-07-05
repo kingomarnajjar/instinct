@@ -5,14 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bets and Odds</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .notification {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+    .notification.info {
+      color: #31708f;
+      background-color: #d9edf7;
+      border-color: #bce8f1;
+    }
+    .notification.success {
+      color: #3c763d;
+      background-color: #dff0d8;
+      border-color: #d6e9c6;
+    }
+    .notification.error {
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
+    }
+  </style>
 </head>
 <body>
   <h1>Betting System</h1>
+  <div id="notification" class="notification info" style="display: none;"></div>
   <form id="betForm">
     <label for="userId">User ID:</label>
     <input type="number" id="userId" name="userId" required>
     <label for="team">Team:</label>
-    <input type="number" id="team" name="team" required>
+    <button type="button" id="teamAButton" data-team="0">Team A</button>
+    <button type="button" id="teamBButton" data-team="1">Team B</button>
+    <input type="hidden" id="team" name="team" required>
     <label for="cashAmount">Cash Amount:</label>
     <input type="number" id="cashAmount" name="cashAmount" required>
     <button type="submit">Place Bet</button>
@@ -34,15 +60,59 @@
 
   <h2>All Bets</h2>
   <div id="allBetsContainer"></div>
+  <p>Fulfilled Bets: <span id="fulfilledCounter">0</span></p>
+  <p>Waiting to be Fulfilled: <span id="unfulfilledCounter">0</span></p>
 
   <script>
     const betForm = document.getElementById('betForm');
     const oddsContainer = document.getElementById('oddsContainer');
     const oddsOnOfferContainer = document.getElementById('oddsOnOfferContainer');
     const allBetsContainer = document.getElementById('allBetsContainer');
+    const notification = document.getElementById('notification');
+    const teamAButton = document.getElementById('teamAButton');
+    const teamBButton = document.getElementById('teamBButton');
+    const teamInput = document.getElementById('team');
     const oddsForm = document.getElementById('oddsForm');
+    const fulfilledCounter = document.getElementById('fulfilledCounter');
+    const unfulfilledCounter = document.getElementById('unfulfilledCounter');
     const ctx = document.getElementById('bettingChart').getContext('2d');
     let chart;
+
+    const showNotification = (message, type) => {
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.style.display = 'block';
+    };
+
+    const hideNotification = () => {
+      notification.style.display = 'none';
+    };
+
+    const checkBetAvailability = async () => {
+      const response = await fetch('/bets');
+      const data = await response.json();
+
+      const unmatchedBets = data.unmatchedBets;
+      const opposingBetAvailable = unmatchedBets.some(bet => bet.team !== parseInt(teamInput.value));
+
+      betForm.querySelector('button[type="submit"]').disabled = !opposingBetAvailable;
+
+      if (!opposingBetAvailable) {
+        showNotification('Bets on this team are disabled until there is a matching bet on the other team.', 'info');
+      } else {
+        hideNotification();
+      }
+    };
+
+    teamAButton.addEventListener('click', () => {
+      teamInput.value = 0;
+      checkBetAvailability();
+    });
+
+    teamBButton.addEventListener('click', () => {
+      teamInput.value = 1;
+      checkBetAvailability();
+    });
 
     betForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -56,6 +126,16 @@
       updateOdds(data.odds);
       updateChart(data.odds);
       updateAllBets(data.allBets);
+      updateCounters(data.allBets);
+      checkBetAvailability();
+
+      if (data.allBets.some(bet => bet.userId === parseInt(userId) && bet.status === 'matched')) {
+        showNotification('Your bet has been successfully fulfilled!', 'success');
+      } else if (data.allBets.some(bet => bet.userId === parseInt(userId) && bet.status === 'partially matched')) {
+        showNotification('Your bet has been partially fulfilled and is waiting to be fully matched.', 'info');
+      } else {
+        showNotification('Your bet is waiting to be fulfilled.', 'info');
+      }
     });
 
     oddsForm.addEventListener('submit', async (e) => {
@@ -116,10 +196,21 @@
       allBetsContainer.innerHTML = '';
       bets.forEach(bet => {
         const p = document.createElement('p');
-        p.textContent = `User ${bet.userId} bet ${bet.amount} on Team ${bet.team} at odds ${bet.odds}`;
+        p.textContent = `User ${bet.userId} bet ${bet.amount} on Team ${bet.team} at odds ${bet.odds} (${bet.status})`;
         allBetsContainer.appendChild(p);
       });
     }
+
+    function updateCounters(bets) {
+      const fulfilledBets = bets.filter(bet => bet.status === 'matched').length;
+      const unfulfilledBets = bets.filter(bet => bet.status === 'unmatched' || bet.status === 'partially matched').length;
+
+      fulfilledCounter.textContent = fulfilledBets;
+      unfulfilledCounter.textContent = unfulfilledBets;
+    }
+
+    teamInput.addEventListener('input', checkBetAvailability);
+    checkBetAvailability();
   </script>
 </body>
 </html>
