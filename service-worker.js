@@ -1,8 +1,10 @@
 const CACHE_NAME = 'instinct-app-cache';
 const urlsToCache = [
-    '/instinct/',
-    '/instinct/index.html',
-    '/instinct/manifest.json',
+    '/',
+    '/index.html',
+    '/manifest.json',
+    '/icon-192x192.png',
+    '/icon-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {
