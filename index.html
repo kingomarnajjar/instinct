@@ -38,7 +38,7 @@
             padding: 20px;
             border-radius: 10px;
             background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #fff;
+            border: 1px solid #fff; /* Added white thin border */
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
             margin-top: 20px;
         }
@@ -74,8 +74,8 @@
             background-color: #222;
             color: #fff;
             margin-top: 10px;
-            font-weight: 300;
-            line-height: 1.5;
+            font-weight: 300; /* Lighter font */
+            line-height: 1.5; /* Taller text */
         }
         .avatars img {
             width: 60px;
@@ -96,8 +96,8 @@
             max-width: 600px;
             height: 300px;
             border-radius: 10px;
-            margin: 0 auto;
-            overflow: hidden;
+            margin: 0 auto; /* Centers the video frame */
+            overflow: hidden; /* Ensures no overflow from the video */
         }
         .live-indicator {
             position: absolute;
@@ -110,7 +110,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             animation: flash 1s infinite;
-            z-index: 20;
+            z-index: 20; /* Ensures it is above the video */
         }
         .countdown {
             position: absolute;
@@ -120,7 +120,7 @@
             font-size: 48px;
             font-weight: 700;
             z-index: 10;
-            color: #FFF;
+            color: #FFF; /* Ensures visibility on top of any background */
         }
         .bet-buttons {
             display: flex;
@@ -196,7 +196,7 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            z-index: 30;
+            z-index: 30; /* Ensures it is above other elements */
         }
         .live-chat-btn:hover {
             background-color: #0056b3;
@@ -210,12 +210,12 @@
             height: 50%;
             max-height: 400px;
             background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #fff;
+            border: 1px solid #fff; /* Added white thin border */
             border-radius: 10px;
             padding: 10px;
             display: none;
             flex-direction: column;
-            z-index: 40;
+            z-index: 40; /* Ensures it is above the chat button */
         }
         .live-chat-popup.active {
             display: flex;
@@ -313,7 +313,7 @@
     </div>
 
     <script>
-        const WORKER_URL = 'https://instinct-api.starfiles.workers.dev/user'; // Replace with your worker URL
+        const WORKER_URL = 'https://instinct-api.yazdani.dev'; // Replace with your worker URL
 
         async function navigateTo(pageId) {
             document.querySelectorAll('.page').forEach(page => {
@@ -345,7 +345,7 @@
                     clearInterval(countdownTimer);
                     // Only create and display the video after the countdown finishes
                     var iframe = document.createElement('iframe');
-                    iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/7d7cb4e7e6ead747b72073c3824a9d3f/iframe?preload=true&autoplay=true&poster=https%3A%2F%2Fcustomer-0sb72e7akfw9m0dg.cloudflarestream.com%2F7d7cb4e7e6ead747b72073c3824a9d3f%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false";
+                    iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/7d7cb4e7e6ead747b72073c3824a9d3f/iframe?muted=true&preload=true&autoplay=true&poster=https%3A%2F%2Fcustomer-0sb72e7akfw9m0dg.cloudflarestream.com%2F7d7cb4e7e6ead747b72073c3824a9d3f%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false";
                     iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
                     iframe.allow = "accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;";
                     iframe.allowfullscreen = true;
@@ -373,7 +373,7 @@
 
         async function fetchUserData() {
             const email = document.getElementById('email').value;
-            const response = await fetch(`${WORKER_URL}?email=${encodeURIComponent(email)}`, { method: 'GET' });
+            const response = await fetch(`${WORKER_URL}/user?email=${encodeURIComponent(email)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
                 document.getElementById('name').value = userData.name || '';
@@ -391,11 +391,11 @@
             }
 
             const userData = {
-                email: document.getElementById('email').value,
                 name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value
             };
-            const response = await fetch(WORKER_URL, {
+            const response = await fetch(`${WORKER_URL}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData)
@@ -453,6 +453,7 @@
                 });
             });
         }
+
     </script>
 </body>
 </html>
