@@ -3,11 +3,8 @@ self.addEventListener('install', (event) => {
         caches.open('instinct-app-cache').then((cache) => {
             return cache.addAll([
                 '/',
-                '/index.html',
-                '/styles.css',
-                '/script.js',
-                '/icon.png',
-                '/manifest.json',
+                'index.html',
+                'manifest.json',
             ]);
         })
     );
