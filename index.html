@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instinct App</title>
+    <link rel="canonical" href="https://kingomarnajjar.github.io/instinct/" />
+    <link rel="manifest" href="/instinct/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#000000">
     <style>
         :root {
             --primary-neon: rgba(0, 255, 0, 0.9);
@@ -38,7 +38,7 @@
             padding: 20px;
             border-radius: 10px;
             background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #fff; /* Added white thin border */
+            border: 1px solid #fff;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
             margin-top: 20px;
         }
@@ -74,8 +74,8 @@
             background-color: #222;
             color: #fff;
             margin-top: 10px;
-            font-weight: 300; /* Lighter font */
-            line-height: 1.5; /* Taller text */
+            font-weight: 300;
+            line-height: 1.5;
         }
         .avatars img {
             width: 60px;
@@ -96,8 +96,8 @@
             max-width: 600px;
             height: 300px;
             border-radius: 10px;
-            margin: 0 auto; /* Centers the video frame */
-            overflow: hidden; /* Ensures no overflow from the video */
+            margin: 0 auto;
+            overflow: hidden;
         }
         .live-indicator {
             position: absolute;
@@ -110,7 +110,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             animation: flash 1s infinite;
-            z-index: 20; /* Ensures it is above the video */
+            z-index: 20;
         }
         .countdown {
             position: absolute;
@@ -120,7 +120,7 @@
             font-size: 48px;
             font-weight: 700;
             z-index: 10;
-            color: #FFF; /* Ensures visibility on top of any background */
+            color: #FFF;
         }
         .bet-buttons {
             display: flex;
@@ -196,7 +196,7 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            z-index: 30; /* Ensures it is above other elements */
+            z-index: 30;
         }
         .live-chat-btn:hover {
             background-color: #0056b3;
@@ -210,12 +210,12 @@
             height: 50%;
             max-height: 400px;
             background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #fff; /* Added white thin border */
+            border: 1px solid #fff;
             border-radius: 10px;
             padding: 10px;
             display: none;
             flex-direction: column;
-            z-index: 40; /* Ensures it is above the chat button */
+            z-index: 40;
         }
         .live-chat-popup.active {
             display: flex;
@@ -446,14 +446,13 @@
         // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js').then((registration) => {
+                navigator.serviceWorker.register('/instinct/service-worker.js').then((registration) => {
                     console.log('Service Worker registered with scope:', registration.scope);
                 }, (err) => {
                     console.log('Service Worker registration failed:', err);
                 });
             });
         }
-
     </script>
 </body>
 </html>
