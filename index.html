@@ -6,6 +6,17 @@
     <title>Instinct App</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-neon: rgba(0, 255, 0, 0.9);
+            --light-neon: rgba(0, 255, 0, 0.7);
+            --pulse-neon: rgba(0, 255, 0, 0.5);
+            --bright-neon: rgba(0, 255, 0, 1);
+            --off-neon: #333;
+            --neon-shadow: 0 0 7px 4px var(--light-neon), 0 0 7px 4px var(--light-neon) inset;
+            --neon-shadow-pulse: 0 0 8px 5px var(--pulse-neon), 0 0 8px 5px var(--pulse-neon) inset;
+            --neon-shadow-bright: 0 0 8px 4px var(--bright-neon), 0 0 8px 4px var(--bright-neon) inset;
+            --neon-shadow-text: 0 0 7px var(--primary-neon);
+        }
         body {
             font-family: 'Syne', sans-serif;
             background-color: #000;
@@ -25,6 +36,7 @@
             padding: 20px;
             border-radius: 10px;
             background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #fff; /* Added white thin border */
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
             margin-top: 20px;
         }
@@ -42,10 +54,15 @@
             font-weight: bold;
             margin-top: 10px;
             transition: background-color 0.2s ease, color 0.2s ease;
+            position: relative;
+            text-transform: uppercase;
+            box-shadow: var(--neon-shadow);
+            animation: flicker 10s linear infinite;
         }
         .btn-place:hover, .btn-confirm:hover {
-            background: #fff;
-            color: #000;
+            color: var(--primary-neon);
+            border-color: var(--primary-neon);
+            text-shadow: var(--neon-shadow-text);
         }
         input[type="email"], input[type="text"], input[type="tel"], textarea {
             width: calc(100% - 40px);
@@ -116,13 +133,138 @@
                 opacity: 0;
             }
         }
-        .live-chat, .live-messages-container {
+        @keyframes flicker {
+            0% {
+                box-shadow: var(--neon-shadow);
+            }
+            45% {
+                box-shadow: var(--neon-shadow-pulse);
+            }
+            90% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+                color: var(--primary-neon);
+                text-shadow: var(--neon-shadow-text);
+            }
+            90.01% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+                color: var(--off-neon);
+                text-shadow: none;
+            }
+            94% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+            }
+            94.01% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+            }
+            95% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+            }
+            95.01% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+            }
+            95.5% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+            }
+            95.51% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+            }
+            96% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+            }
+            96.01% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+            }
+            96.5% {
+                box-shadow: none;
+                border-color: var(--off-neon);
+            }
+            96.51% {
+                box-shadow: var(--neon-shadow-bright);
+                border-color: var(--primary-neon);
+            }
+            100% {
+                box-shadow: var(--neon-shadow);
+                border-color: var(--primary-neon);
+            }
+        }
+        .live-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            z-index: 30; /* Ensures it is above other elements */
+        }
+        .live-chat-btn:hover {
+            background-color: #0056b3;
+        }
+        .live-chat-popup {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: calc(100% - 40px);
+            max-width: 400px;
+            height: 50%;
+            max-height: 400px;
             background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #fff; /* Added white thin border */
             border-radius: 10px;
             padding: 10px;
-            margin-top: 20px;
+            display: none;
+            flex-direction: column;
+            z-index: 40; /* Ensures it is above the chat button */
         }
-        .message {
+        .live-chat-popup.active {
+            display: flex;
+        }
+        .live-chat-popup .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .live-chat-popup .chat-input {
+            display: flex;
+            align-items: center;
+        }
+        .live-chat-popup .chat-input textarea {
+            flex: 1;
+            margin-right: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #fff;
+            background-color: #222;
+            color: #fff;
+            resize: none;
+        }
+        .live-chat-popup .chat-input button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            border: 1px solid #fff;
+            background: #007bff;
+            cursor: pointer;
+        }
+        .live-chat-popup .chat-input button:hover {
+            background: #0056b3;
+        }
+        .live-chat-popup .message {
             color: #fff;
             background: rgba(255, 255, 255, 0.1);
             padding: 5px;
@@ -164,9 +306,15 @@
             <button class="btn-place" onclick="bet('Lion')">Bet Lion</button>
             <button class="btn-confirm" onclick="bet('Buffalo')">Bet Buffalo</button>
         </div>
-        <div class="live-chat">
-            <textarea id="chatBox" placeholder="Type your message..." onkeydown="if(event.keyCode==13){sendChatMessage()}"></textarea>
-            <div id="liveMessages" class="live-messages-container"></div>
+    </div>
+
+    <div class="live-chat-btn" onclick="toggleChatPopup()">💬 Live Chat</div>
+
+    <div class="live-chat-popup" id="liveChatPopup">
+        <div class="chat-messages" id="liveMessages"></div>
+        <div class="chat-input">
+            <textarea id="chatBox" placeholder="Type your message..." onkeydown="if(event.keyCode==13){sendChatMessage(event)}"></textarea>
+            <button onclick="sendChatMessage(event)">Send</button>
         </div>
     </div>
 
@@ -206,7 +354,13 @@
             }, 1000);
         }
 
-        function sendChatMessage() {
+        function toggleChatPopup() {
+            var chatPopup = document.getElementById('liveChatPopup');
+            chatPopup.classList.toggle('active');
+        }
+
+        function sendChatMessage(event) {
+            event.preventDefault();
             var message = document.getElementById('chatBox').value.trim();
             if (message) {
                 var messageElement = document.createElement('div');
