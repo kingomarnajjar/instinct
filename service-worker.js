@@ -3,6 +3,8 @@ const urlsToCache = [
     '/instinct/',
     '/instinct/index.html',
     '/instinct/manifest.json',
+    '/instinct/favicon/android-chrome-192x192.png',
+    '/instinct/favicon/android-chrome-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {
