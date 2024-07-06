@@ -274,18 +274,21 @@
     </style>
 </head>
 <body>
+    <!-- Page 1: Email Input -->
     <div id="page1" class="page active">
         <h1 class="text-2xl font-bold text-center mb-4">Instinct</h1>
         <input type="email" id="email" placeholder="Enter your email" required>
         <button class="btn-place" onclick="navigateTo('page2')">Enter</button>
     </div>
+    <!-- Page 2: User Info -->
     <div id="page2" class="page">
         <h1 class="text-2xl font-bold text-center mb-4">Welcome, <span id="userEmail"></span></h1>
         <h2 class="text-xl text-center mb-4">Setup your account</h2>
         <input type="text" id="name" placeholder="Name" required>
         <input type="tel" id="phone" placeholder="Phone" required>
-        <button class="btn-place" onclick="navigateTo('page3')">Next</button>
+        <button class="btn-place" onclick="saveUserData()">Next</button>
     </div>
+    <!-- Page 3: Avatar Selection -->
     <div id="page3" class="page">
         <h2 class="text-xl text-center mb-4">Choose your avatar</h2>
         <div class="avatars flex justify-center gap-4">
@@ -296,6 +299,7 @@
         </div>
         <button class="btn-place" onclick="navigateTo('page4')">Next</button>
     </div>
+    <!-- Page 4: Video and Bet Buttons -->
     <div id="page4" class="page">
         <div class="video-frame mb-4">
             <div class="countdown" id="countdown">5</div>
@@ -319,12 +323,16 @@
     </div>
 
     <script>
-        function navigateTo(pageId) {
+        const WORKER_URL = 'https://example-worker.example.workers.dev/user'; // Replace with your worker URL
+
+        async function navigateTo(pageId) {
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
             document.getElementById(pageId).classList.add('active');
-            if (pageId === 'page4') {
+            if (pageId === 'page2') {
+                await fetchUserData();
+            } else if (pageId === 'page4') {
                 startCountdown(5);
             }
         }
@@ -369,6 +377,45 @@
                 document.getElementById('liveMessages').appendChild(messageElement);
                 document.getElementById('chatBox').value = ''; // Clear the input after sending
             }
+        }
+
+        async function fetchUserData() {
+            const email = document.getElementById('email').value;
+            const response = await fetch(`${WORKER_URL}?email=${encodeURIComponent(email)}`, { method: 'GET' });
+            if (response.ok) {
+                const userData = await response.json();
+                document.getElementById('name').value = userData.name || '';
+                document.getElementById('phone').value = userData.phone || '';
+                document.getElementById('userEmail').textContent = userData.email || '';
+            } else {
+                console.error('Failed to fetch user data');
+            }
+        }
+
+        async function saveUserData() {
+            const userData = {
+                email: document.getElementById('email').value,
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value
+            };
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            if (response.ok) {
+                navigateTo('page3'); // Navigate to the next page after saving data
+            } else {
+                console.error('Failed to save user data');
+            }
+        }
+
+        function selectAvatar(avatarId) {
+            console.log('Selected avatar:', avatarId);
+        }
+
+        function bet(option) {
+            console.log('Bet on:', option);
         }
     </script>
 </body>
