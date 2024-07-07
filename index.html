@@ -39,7 +39,7 @@
             padding: 20px;
             border-radius: 10px;
             background: rgba(20, 20, 20, 0.8);
-            border: 1px solid #fff;
+            border: 1px solid #fff; /* Added white thin border */
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
             margin-top: 20px;
         }
@@ -75,8 +75,8 @@
             background-color: #222;
             color: #fff;
             margin-top: 10px;
-            font-weight: 300;
-            line-height: 1.5;
+            font-weight: 300; /* Lighter font */
+            line-height: 1.5; /* Taller text */
         }
         .avatars img {
             width: 60px;
@@ -97,8 +97,8 @@
             max-width: 600px;
             height: 300px;
             border-radius: 10px;
-            margin: 0 auto;
-            overflow: hidden;
+            margin: 0 auto; /* Centers the video frame */
+            overflow: hidden; /* Ensures no overflow from the video */
         }
         .live-indicator {
             position: absolute;
@@ -111,7 +111,7 @@
             padding: 5px 10px;
             border-radius: 5px;
             animation: flash 1s infinite;
-            z-index: 20;
+            z-index: 20; /* Ensures it is above the video */
         }
         .countdown {
             position: absolute;
@@ -121,7 +121,7 @@
             font-size: 48px;
             font-weight: 700;
             z-index: 10;
-            color: #FFF;
+            color: #FFF; /* Ensures visibility on top of any background */
         }
         .bet-buttons {
             display: flex;
@@ -165,7 +165,7 @@
             }
             95% {
                 box-shadow: var(--neon-shadow);
-                border-color: var(--primary-neon);
+                border-color: var (--primary-neon);
             }
             95.01% {
                 box-shadow: none;
@@ -197,7 +197,7 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            z-index: 30;
+            z-index: 30; /* Ensures it is above other elements */
         }
         .live-chat-btn:hover {
             background-color: #0056b3;
@@ -211,13 +211,13 @@
             height: 50%;
             max-height: 400px;
             background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #fff;
+            border: 1px solid #fff; /* Added white thin border */
             border-radius: 10px;
             padding: 10px;
             display: none;
             flex-direction: column;
-            z-index: 40;
-            overflow-y: scroll;
+            z-index: 40; /* Ensures it is above the chat button */
+            overflow-y: scroll; /* Enable scrolling */
         }
         .live-chat-popup.active {
             display: flex;
@@ -263,9 +263,8 @@
             position: absolute;
             font-size: 24px;
             font-weight: bold;
-            color: #fff;
-            pointer-events: none;
-            transition: all 1.5s ease-out;
+            color: green;
+            transition: transform 1.5s ease, opacity 1.5s ease;
         }
     </style>
 </head>
@@ -308,16 +307,14 @@
         <div class="video-frame mb-4">
             <div class="countdown" id="countdown">5</div>
             <div class="live-indicator">LIVE</div>
+            <!-- iframe is now dynamically added by the script to control timing -->
         </div>
         <div class="bet-buttons">
-            <button class="btn-place" id="btnLion" onclick="placeBet('Lion')">Bet Lion</button>
-            <button class="btn-confirm" id="btnBuffalo" onclick="placeBet('Buffalo')">Bet Buffalo</button>
+            <button class="btn-place" onclick="placeBet('Lion')">Bet Lion</button>
+            <button class="btn-confirm" onclick="placeBet('Buffalo')">Bet Buffalo</button>
         </div>
-        <div class="bet-info">
-            <p>Total Bets on Lion: $<span id="totalBetsLion">0</span></p>
-            <p>Total Bets on Buffalo: $<span id="totalBetsBuffalo">0</span></p>
-            <p>Your Potential Payout: $<span id="potentialPayout">0</span></p>
-        </div>
+        <div>Total Bets on Lion: $<span id="totalBetsLion">0</span></div>
+        <div>Total Bets on Buffalo: $<span id="totalBetsBuffalo">0</span></div>
     </div>
 
     <div class="live-chat-btn" onclick="toggleChatPopup()">💬 Live Chat</div>
@@ -331,10 +328,10 @@
     </div>
 
     <script>
-        const WORKER_URL = 'https://instinct-api.yazdani.dev';
+        const WORKER_URL = 'https://instinct-api.yazdani.dev'; // Updated API URL
         let userEmail = '';
         let defaultBetSize = 0;
-        let eventID = 95; // Default event ID
+        let eventID = 8; // Default event ID
 
         async function navigateTo(pageId) {
             document.querySelectorAll('.page').forEach(page => {
@@ -349,7 +346,7 @@
                 generateRandomAvatars();
             } else if (pageId === 'page5') {
                 userEmail = document.getElementById('email').value;
-                defaultBetSize = parseFloat(document.getElementById('defaultBetSize').value);
+                defaultBetSize = document.getElementById('defaultBetSize').value;
                 startCountdown(5);
                 await fetchUserBalance();
                 await fetchTotalBets();
@@ -370,6 +367,7 @@
                 if (--timer < 0) {
                     countdownElement.style.display = 'none';
                     clearInterval(countdownTimer);
+                    // Only create and display the video after the countdown finishes
                     var iframe = document.createElement('iframe');
                     iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/7d7cb4e7e6ead747b72073c3824a9d3f/iframe?preload=true&autoplay=true&poster=https%3A%2F%2Fcustomer-0sb72e7akfw9m0dg.cloudflarestream.com%2F7d7cb4e7e6ead747b72073c3824a9d3f%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false";
                     iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
@@ -377,6 +375,7 @@
                     iframe.allowfullscreen = true;
                     videoFrame.appendChild(iframe);
 
+                    // Listen for the end of the first video
                     iframe.onload = function () {
                         var firstVideo = iframe.contentWindow.document.querySelector('video');
                         if (firstVideo) {
@@ -390,7 +389,9 @@
         }
 
         function playEndingVideo(videoFrame) {
+            // Remove the first video
             videoFrame.innerHTML = '';
+            // Add the ending video
             var iframe = document.createElement('iframe');
             iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/ea82c3f795b5a68a78ef3d44c85a689f/watch/iframe?preload=true&autoplay=true";
             iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
@@ -421,9 +422,9 @@
             const response = await fetch(`${WORKER_URL}/user?email=${encodeURIComponent(email)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
-                document.getElementById('name').value = userData.name || '';
-                document.getElementById('phone').value = userData.phone || '';
-                document.getElementById('userEmail').textContent = userData.email || '';
+                document.getElementById('name').value = userData.user.name || '';
+                document.getElementById('phone').value = userData.user.phone || '';
+                document.getElementById('userEmail').textContent = userData.user.email || '';
             } else {
                 console.error('Failed to fetch user data');
             }
@@ -431,7 +432,7 @@
 
         async function saveUserData() {
             if (document.getElementById('bypassValidation').checked) {
-                navigateTo('page3');
+                navigateTo('page3'); // Skip validation and navigate to next page
                 return;
             }
 
@@ -446,7 +447,7 @@
                 body: JSON.stringify(userData)
             });
             if (response.ok) {
-                navigateTo('page3');
+                navigateTo('page3'); // Navigate to the next page after saving data
             } else {
                 console.error('Failed to save user data');
             }
@@ -457,7 +458,6 @@
         }
 
         async function placeBet(team) {
-            const betAmount = defaultBetSize;
             const response = await fetch(`${WORKER_URL}/bet`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -465,14 +465,14 @@
                     email: userEmail,
                     event: eventID,
                     team: team === 'Lion' ? 0 : 1,
-                    amount: betAmount
+                    amount: defaultBetSize
                 })
             });
             if (response.ok) {
                 console.log('Bet placed successfully');
                 await fetchUserBalance();
                 await fetchTotalBets();
-                displayFloatingBet(betAmount);
+                displayFloatingBet(team, defaultBetSize);
             } else {
                 console.error('Failed to place bet');
             }
@@ -483,15 +483,17 @@
             if (response.ok) {
                 const userData = await response.json();
                 document.getElementById('userBalance').textContent = userData.user.balance || '0';
-                const betButtons = document.querySelectorAll('.bet-buttons button');
-                if (userData.user.balance < defaultBetSize) {
-                    betButtons.forEach(button => button.disabled = true);
-                } else {
-                    betButtons.forEach(button => button.disabled = false);
-                }
+                toggleBetButtons(userData.user.balance);
             } else {
                 console.error('Failed to fetch user balance');
             }
+        }
+
+        function toggleBetButtons(balance) {
+            const buttons = document.querySelectorAll('.bet-buttons button');
+            buttons.forEach(button => {
+                button.disabled = balance < defaultBetSize;
+            });
         }
 
         async function fetchTotalBets() {
@@ -507,9 +509,29 @@
             }
         }
 
+        function displayFloatingBet(team, amount) {
+            const floatingBet = document.createElement('div');
+            floatingBet.className = 'floating-bet';
+            floatingBet.textContent = `$${amount} on ${team}`;
+            document.body.appendChild(floatingBet);
+
+            const { x, y } = event.target.getBoundingClientRect();
+            floatingBet.style.left = `${x}px`;
+            floatingBet.style.top = `${y}px`;
+
+            setTimeout(() => {
+                floatingBet.style.transform = `translateY(-100px)`;
+                floatingBet.style.opacity = 0;
+            }, 0);
+
+            setTimeout(() => {
+                document.body.removeChild(floatingBet);
+            }, 1500);
+        }
+
         function generateRandomAvatars() {
             const avatarsContainer = document.querySelector('.avatars');
-            avatarsContainer.innerHTML = ''; 
+            avatarsContainer.innerHTML = ''; // Clear existing avatars
 
             for (let i = 0; i < 4; i++) {
                 const avatarId = Math.floor(Math.random() * 1000000);
@@ -521,30 +543,7 @@
             }
         }
 
-        function displayFloatingBet(amount) {
-            const betElement = document.createElement('div');
-            betElement.classList.add('floating-bet');
-            betElement.textContent = `+ $${amount}`;
-            document.body.appendChild(betElement);
-
-            const startPos = {
-                x: window.innerWidth / 2 - betElement.offsetWidth / 2,
-                y: window.innerHeight / 2
-            };
-
-            betElement.style.left = `${startPos.x}px`;
-            betElement.style.top = `${startPos.y}px`;
-
-            setTimeout(() => {
-                betElement.style.transform = `translateY(-200px)`;
-                betElement.style.opacity = '0';
-            }, 100);
-
-            setTimeout(() => {
-                document.body.removeChild(betElement);
-            }, 1600);
-        }
-
+        // Add to Home Screen Prompt
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -572,6 +571,7 @@
             });
         }
 
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/instinct/service-worker.js').then((registration) => {
