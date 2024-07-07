@@ -67,6 +67,23 @@
             border-color: var(--primary-neon);
             text-shadow: var(--neon-shadow-text);
         }
+        .floating-bet {
+            position: absolute;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            animation: floatAndDisappear 2s forwards;
+        }
+        @keyframes floatAndDisappear {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
         input[type="email"], input[type="text"], input[type="tel"], input[type="number"], textarea {
             width: calc(100% - 40px);
             padding: 10px;
@@ -165,7 +182,7 @@
             }
             95% {
                 box-shadow: var(--neon-shadow);
-                border-color: var (--primary-neon);
+                border-color: var(--primary-neon);
             }
             95.01% {
                 box-shadow: none;
@@ -191,7 +208,8 @@
             font-size: 18px;
             font-weight: bold;
             color: #fff;
-            background-color: #007bff;
+            background-color: #000;
+            border: 1px solid #fff;
             padding: 10px 15px;
             border-radius: 50px;
             cursor: pointer;
@@ -200,7 +218,7 @@
             z-index: 30; /* Ensures it is above other elements */
         }
         .live-chat-btn:hover {
-            background-color: #0056b3;
+            background-color: #333;
         }
         .live-chat-popup {
             position: fixed;
@@ -259,13 +277,6 @@
             margin-bottom: 5px;
             border-radius: 5px;
         }
-        .floating-bet {
-            position: absolute;
-            font-size: 24px;
-            font-weight: bold;
-            color: green;
-            transition: transform 1.5s ease, opacity 1.5s ease;
-        }
     </style>
 </head>
 <body>
@@ -313,8 +324,6 @@
             <button class="btn-place" onclick="placeBet('Lion')">Bet Lion</button>
             <button class="btn-confirm" onclick="placeBet('Buffalo')">Bet Buffalo</button>
         </div>
-        <div>Total Bets on Lion: $<span id="totalBetsLion">0</span></div>
-        <div>Total Bets on Buffalo: $<span id="totalBetsBuffalo">0</span></div>
     </div>
 
     <div class="live-chat-btn" onclick="toggleChatPopup()">💬 Live Chat</div>
@@ -328,7 +337,7 @@
     </div>
 
     <script>
-        const WORKER_URL = 'https://instinct-api.yazdani.dev'; // Updated API URL
+        const WORKER_URL = 'https://instinct-api.yazdani.dev';
         let userEmail = '';
         let defaultBetSize = 0;
         let eventID = 8; // Default event ID
@@ -367,7 +376,6 @@
                 if (--timer < 0) {
                     countdownElement.style.display = 'none';
                     clearInterval(countdownTimer);
-                    // Only create and display the video after the countdown finishes
                     var iframe = document.createElement('iframe');
                     iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/7d7cb4e7e6ead747b72073c3824a9d3f/iframe?preload=true&autoplay=true&poster=https%3A%2F%2Fcustomer-0sb72e7akfw9m0dg.cloudflarestream.com%2F7d7cb4e7e6ead747b72073c3824a9d3f%2Fthumbnails%2Fthumbnail.jpg%3Ftime%3D%26height%3D600&controls=false";
                     iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
@@ -375,7 +383,6 @@
                     iframe.allowfullscreen = true;
                     videoFrame.appendChild(iframe);
 
-                    // Listen for the end of the first video
                     iframe.onload = function () {
                         var firstVideo = iframe.contentWindow.document.querySelector('video');
                         if (firstVideo) {
@@ -389,9 +396,7 @@
         }
 
         function playEndingVideo(videoFrame) {
-            // Remove the first video
             videoFrame.innerHTML = '';
-            // Add the ending video
             var iframe = document.createElement('iframe');
             iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/ea82c3f795b5a68a78ef3d44c85a689f/watch/iframe?preload=true&autoplay=true";
             iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
@@ -413,7 +418,7 @@
                 messageElement.classList.add('message');
                 messageElement.textContent = message;
                 document.getElementById('liveMessages').appendChild(messageElement);
-                document.getElementById('chatBox').value = ''; // Clear the input after sending
+                document.getElementById('chatBox').value = ''; 
             }
         }
 
@@ -422,9 +427,9 @@
             const response = await fetch(`${WORKER_URL}/user?email=${encodeURIComponent(email)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
-                document.getElementById('name').value = userData.user.name || '';
-                document.getElementById('phone').value = userData.user.phone || '';
-                document.getElementById('userEmail').textContent = userData.user.email || '';
+                document.getElementById('name').value = userData.name || '';
+                document.getElementById('phone').value = userData.phone || '';
+                document.getElementById('userEmail').textContent = userData.email || '';
             } else {
                 console.error('Failed to fetch user data');
             }
@@ -432,7 +437,7 @@
 
         async function saveUserData() {
             if (document.getElementById('bypassValidation').checked) {
-                navigateTo('page3'); // Skip validation and navigate to next page
+                navigateTo('page3'); 
                 return;
             }
 
@@ -447,7 +452,7 @@
                 body: JSON.stringify(userData)
             });
             if (response.ok) {
-                navigateTo('page3'); // Navigate to the next page after saving data
+                navigateTo('page3'); 
             } else {
                 console.error('Failed to save user data');
             }
@@ -458,6 +463,7 @@
         }
 
         async function placeBet(team) {
+            const amount = defaultBetSize;
             const response = await fetch(`${WORKER_URL}/bet`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -465,34 +471,52 @@
                     email: userEmail,
                     event: eventID,
                     team: team === 'Lion' ? 0 : 1,
-                    amount: defaultBetSize
+                    amount: amount
                 })
             });
             if (response.ok) {
                 console.log('Bet placed successfully');
+                showFloatingBet(amount);
                 await fetchUserBalance();
                 await fetchTotalBets();
-                displayFloatingBet(team, defaultBetSize);
             } else {
                 console.error('Failed to place bet');
             }
+        }
+
+        function showFloatingBet(amount) {
+            const betButton = event.target;
+            const floatingBet = document.createElement('div');
+            floatingBet.classList.add('floating-bet');
+            floatingBet.textContent = `$${amount}`;
+            betButton.appendChild(floatingBet);
+
+            floatingBet.addEventListener('animationend', () => {
+                floatingBet.remove();
+            });
         }
 
         async function fetchUserBalance() {
             const response = await fetch(`${WORKER_URL}/user?email=${encodeURIComponent(userEmail)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
-                document.getElementById('userBalance').textContent = userData.user.balance || '0';
-                toggleBetButtons(userData.user.balance);
+                document.getElementById('userBalance').textContent = userData.balance || '0';
+                checkBalance(userData.balance);
             } else {
                 console.error('Failed to fetch user balance');
             }
         }
 
-        function toggleBetButtons(balance) {
-            const buttons = document.querySelectorAll('.bet-buttons button');
-            buttons.forEach(button => {
-                button.disabled = balance < defaultBetSize;
+        function checkBalance(balance) {
+            const betButtons = document.querySelectorAll('.btn-place, .btn-confirm');
+            betButtons.forEach(button => {
+                if (balance <= 0) {
+                    button.disabled = true;
+                    button.style.opacity = 0.5;
+                } else {
+                    button.disabled = false;
+                    button.style.opacity = 1;
+                }
             });
         }
 
@@ -500,8 +524,8 @@
             const response = await fetch(`${WORKER_URL}/totals?event=${eventID}`, { method: 'GET' });
             if (response.ok) {
                 const totals = await response.json();
-                const totalBetsLion = totals.bets.find(bet => bet.team === 0)?.total || 0;
-                const totalBetsBuffalo = totals.bets.find(bet => bet.team === 1)?.total || 0;
+                const totalBetsLion = totals.find(bet => bet.team === 0)?.total || 0;
+                const totalBetsBuffalo = totals.find(bet => bet.team === 1)?.total || 0;
                 document.getElementById('totalBetsLion').textContent = totalBetsLion;
                 document.getElementById('totalBetsBuffalo').textContent = totalBetsBuffalo;
             } else {
@@ -509,29 +533,9 @@
             }
         }
 
-        function displayFloatingBet(team, amount) {
-            const floatingBet = document.createElement('div');
-            floatingBet.className = 'floating-bet';
-            floatingBet.textContent = `$${amount} on ${team}`;
-            document.body.appendChild(floatingBet);
-
-            const { x, y } = event.target.getBoundingClientRect();
-            floatingBet.style.left = `${x}px`;
-            floatingBet.style.top = `${y}px`;
-
-            setTimeout(() => {
-                floatingBet.style.transform = `translateY(-100px)`;
-                floatingBet.style.opacity = 0;
-            }, 0);
-
-            setTimeout(() => {
-                document.body.removeChild(floatingBet);
-            }, 1500);
-        }
-
         function generateRandomAvatars() {
             const avatarsContainer = document.querySelector('.avatars');
-            avatarsContainer.innerHTML = ''; // Clear existing avatars
+            avatarsContainer.innerHTML = ''; 
 
             for (let i = 0; i < 4; i++) {
                 const avatarId = Math.floor(Math.random() * 1000000);
@@ -543,7 +547,6 @@
             }
         }
 
-        // Add to Home Screen Prompt
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -571,7 +574,6 @@
             });
         }
 
-        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/instinct/service-worker.js').then((registration) => {
