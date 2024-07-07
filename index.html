@@ -519,7 +519,7 @@
         }
 
         async function fetchTotalBets() {
-            const response = await fetch(`https://instinct-api.yazdani.dev/totals?event=8`, { method: 'GET' });
+            const response = await fetch(`https://instinct-api.yazdani.dev/totals?event=95`, { method: 'GET' });
             if (response.ok) {
                 const totals = await response.json();
                 const totalBetsLion = totals.bets.find(bet => bet.team === 0)?.total || 0;
