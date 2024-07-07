@@ -67,6 +67,11 @@
             border-color: var(--primary-neon);
             text-shadow: var(--neon-shadow-text);
         }
+        .btn-disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            box-shadow: none;
+        }
         input[type="email"], input[type="text"], input[type="tel"], input[type="number"], textarea {
             width: calc(100% - 40px);
             padding: 10px;
@@ -259,6 +264,23 @@
             margin-bottom: 5px;
             border-radius: 5px;
         }
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+        .floating-bet {
+            position: fixed;
+            font-size: 24px;
+            color: #fff;
+            z-index: 100;
+            animation: floatUp 2s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -297,14 +319,19 @@
     <!-- Page 5: Video, Bet Buttons, and Balance -->
     <div id="page5" class="page">
         <h2 class="text-xl text-center mb-4">Your Balance: $<span id="userBalance">0</span></h2>
+        <h2 class="text-xl text-center mb-4">Total Bets</h2>
+        <div class="flex justify-around mb-4">
+            <div>Lion: $<span id="totalBetsLion">0</span></div>
+            <div>Buffalo: $<span id="totalBetsBuffalo">0</span></div>
+        </div>
         <div class="video-frame mb-4">
             <div class="countdown" id="countdown">5</div>
             <div class="live-indicator">LIVE</div>
             <!-- iframe is now dynamically added by the script to control timing -->
         </div>
         <div class="bet-buttons">
-            <button class="btn-place" onclick="placeBet('Lion')">Bet Lion</button>
-            <button class="btn-confirm" onclick="placeBet('Giraffe')">Bet Giraffe</button>
+            <button class="btn-place" id="betLionBtn" onclick="placeBet(0)">Bet Lion</button>
+            <button class="btn-confirm" id="betBuffaloBtn" onclick="placeBet(1)">Bet Buffalo</button>
         </div>
     </div>
 
@@ -339,6 +366,7 @@
                 defaultBetSize = document.getElementById('defaultBetSize').value;
                 startCountdown(5);
                 await fetchUserBalance();
+                await fetchTotalBets();
             }
         }
 
@@ -363,8 +391,30 @@
                     iframe.allow = "accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;";
                     iframe.allowfullscreen = true;
                     videoFrame.appendChild(iframe);
+
+                    // Listen for the end of the first video
+                    iframe.onload = function () {
+                        var firstVideo = iframe.contentWindow.document.querySelector('video');
+                        if (firstVideo) {
+                            firstVideo.onended = function () {
+                                playEndingVideo(videoFrame);
+                            };
+                        }
+                    };
                 }
             }, 1000);
+        }
+
+        function playEndingVideo(videoFrame) {
+            // Remove the first video
+            videoFrame.innerHTML = '';
+            // Add the ending video
+            var iframe = document.createElement('iframe');
+            iframe.src = "https://customer-0sb72e7akfw9m0dg.cloudflarestream.com/ea82c3f795b5a68a78ef3d44c85a689f/watch/iframe?preload=true&autoplay=true";
+            iframe.style.cssText = 'border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;';
+            iframe.allow = "accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;";
+            iframe.allowfullscreen = true;
+            videoFrame.appendChild(iframe);
         }
 
         function toggleChatPopup() {
@@ -430,14 +480,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: userEmail,
-                    event: 2,
-                    team: team === 'Lion' ? 1 : 2,
+                    team: team,
                     amount: defaultBetSize
                 })
             });
             if (response.ok) {
                 console.log('Bet placed successfully');
                 await fetchUserBalance();
+                await fetchTotalBets();
+                animateBet(defaultBetSize, team);
             } else {
                 console.error('Failed to place bet');
             }
@@ -447,10 +498,45 @@
             const response = await fetch(`${WORKER_URL}?email=${encodeURIComponent(userEmail)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
-                document.getElementById('userBalance').textContent = userData.balance || '0';
+                const balance = userData.user.balance || 0;
+                document.getElementById('userBalance').textContent = balance;
+
+                // Disable bet buttons if balance is insufficient
+                if (balance < defaultBetSize) {
+                    document.getElementById('betLionBtn').classList.add('btn-disabled');
+                    document.getElementById('betBuffaloBtn').classList.add('btn-disabled');
+                    document.getElementById('betLionBtn').disabled = true;
+                    document.getElementById('betBuffaloBtn').disabled = true;
+                } else {
+                    document.getElementById('betLionBtn').classList.remove('btn-disabled');
+                    document.getElementById('betBuffaloBtn').classList.remove('btn-disabled');
+                    document.getElementById('betLionBtn').disabled = false;
+                    document.getElementById('betBuffaloBtn').disabled = false;
+                }
             } else {
                 console.error('Failed to fetch user balance');
             }
+        }
+
+        async function fetchTotalBets() {
+            const response = await fetch(`https://instinct-api.yazdani.dev/totals?event=8`, { method: 'GET' });
+            if (response.ok) {
+                const totals = await response.json();
+                const totalBetsLion = totals.bets.find(bet => bet.team === 0)?.total || 0;
+                const totalBetsBuffalo = totals.bets.find(bet => bet.team === 1)?.total || 0;
+                document.getElementById('totalBetsLion').textContent = totalBetsLion;
+                document.getElementById('totalBetsBuffalo').textContent = totalBetsBuffalo;
+            } else {
+                console.error('Failed to fetch total bets');
+            }
+        }
+
+        function animateBet(amount, team) {
+            const betElement = document.createElement('div');
+            betElement.classList.add('floating-bet');
+            betElement.textContent = `$${amount} on ${team === 0 ? 'Lion' : 'Buffalo'}`;
+            document.body.appendChild(betElement);
+            setTimeout(() => betElement.remove(), 2000);
         }
 
         function generateRandomAvatars() {
