@@ -67,11 +67,6 @@
             border-color: var(--primary-neon);
             text-shadow: var(--neon-shadow-text);
         }
-        .btn-disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-            box-shadow: none;
-        }
         input[type="email"], input[type="text"], input[type="tel"], input[type="number"], textarea {
             width: calc(100% - 40px);
             padding: 10px;
@@ -264,23 +259,6 @@
             margin-bottom: 5px;
             border-radius: 5px;
         }
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-100px);
-            }
-        }
-        .floating-bet {
-            position: fixed;
-            font-size: 24px;
-            color: #fff;
-            z-index: 100;
-            animation: floatUp 2s ease-out;
-        }
     </style>
 </head>
 <body>
@@ -319,11 +297,6 @@
     <!-- Page 5: Video, Bet Buttons, and Balance -->
     <div id="page5" class="page">
         <h2 class="text-xl text-center mb-4">Your Balance: $<span id="userBalance">0</span></h2>
-        <h2 class="text-xl text-center mb-4">Total Bets</h2>
-        <div class="flex justify-around mb-4">
-            <div>Lion: $<span id="totalBetsLion">0</span></div>
-            <div>Buffalo: $<span id="totalBetsBuffalo">0</span></div>
-        </div>
         <div class="video-frame mb-4">
             <div class="countdown" id="countdown">5</div>
             <div class="live-indicator">LIVE</div>
@@ -332,6 +305,10 @@
         <div class="bet-buttons">
             <button class="btn-place" id="betLionBtn" onclick="placeBet(0)">Bet Lion</button>
             <button class="btn-confirm" id="betBuffaloBtn" onclick="placeBet(1)">Bet Buffalo</button>
+        </div>
+        <div>
+            <p>Total Bets on Lion: <span id="totalBetsLion">0</span></p>
+            <p>Total Bets on Buffalo: <span id="totalBetsBuffalo">0</span></p>
         </div>
     </div>
 
@@ -486,9 +463,9 @@
             });
             if (response.ok) {
                 console.log('Bet placed successfully');
+                animateBetAmount(team, defaultBetSize);
                 await fetchUserBalance();
                 await fetchTotalBets();
-                animateBet(defaultBetSize, team);
             } else {
                 console.error('Failed to place bet');
             }
@@ -498,20 +475,16 @@
             const response = await fetch(`${WORKER_URL}?email=${encodeURIComponent(userEmail)}`, { method: 'GET' });
             if (response.ok) {
                 const userData = await response.json();
-                const balance = userData.user.balance || 0;
-                document.getElementById('userBalance').textContent = balance;
-
+                document.getElementById('userBalance').textContent = userData.user.balance || '0';
                 // Disable bet buttons if balance is insufficient
-                if (balance < defaultBetSize) {
-                    document.getElementById('betLionBtn').classList.add('btn-disabled');
-                    document.getElementById('betBuffaloBtn').classList.add('btn-disabled');
-                    document.getElementById('betLionBtn').disabled = true;
-                    document.getElementById('betBuffaloBtn').disabled = true;
+                const betLionBtn = document.getElementById('betLionBtn');
+                const betBuffaloBtn = document.getElementById('betBuffaloBtn');
+                if (userData.user.balance < defaultBetSize) {
+                    betLionBtn.disabled = true;
+                    betBuffaloBtn.disabled = true;
                 } else {
-                    document.getElementById('betLionBtn').classList.remove('btn-disabled');
-                    document.getElementById('betBuffaloBtn').classList.remove('btn-disabled');
-                    document.getElementById('betLionBtn').disabled = false;
-                    document.getElementById('betBuffaloBtn').disabled = false;
+                    betLionBtn.disabled = false;
+                    betBuffaloBtn.disabled = false;
                 }
             } else {
                 console.error('Failed to fetch user balance');
@@ -531,14 +504,6 @@
             }
         }
 
-        function animateBet(amount, team) {
-            const betElement = document.createElement('div');
-            betElement.classList.add('floating-bet');
-            betElement.textContent = `$${amount} on ${team === 0 ? 'Lion' : 'Buffalo'}`;
-            document.body.appendChild(betElement);
-            setTimeout(() => betElement.remove(), 2000);
-        }
-
         function generateRandomAvatars() {
             const avatarsContainer = document.querySelector('.avatars');
             avatarsContainer.innerHTML = ''; // Clear existing avatars
@@ -551,6 +516,26 @@
                 img.onclick = () => selectAvatar(avatarId);
                 avatarsContainer.appendChild(img);
             }
+        }
+
+        function animateBetAmount(team, amount) {
+            const betButton = team === 0 ? document.getElementById('betLionBtn') : document.getElementById('betBuffaloBtn');
+            const betAnimation = document.createElement('div');
+            betAnimation.textContent = `$${amount}`;
+            betAnimation.style.position = 'absolute';
+            betAnimation.style.color = 'yellow';
+            betAnimation.style.top = `${betButton.getBoundingClientRect().top}px`;
+            betAnimation.style.left = `${betButton.getBoundingClientRect().left}px`;
+            betAnimation.style.zIndex = 1000;
+            betAnimation.style.transition = 'all 1s ease-out';
+            document.body.appendChild(betAnimation);
+            setTimeout(() => {
+                betAnimation.style.transform = `translateY(-100px)`;
+                betAnimation.style.opacity = 0;
+            }, 100);
+            setTimeout(() => {
+                betAnimation.remove();
+            }, 1100);
         }
 
         // Add to Home Screen Prompt
